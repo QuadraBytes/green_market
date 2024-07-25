@@ -71,8 +71,8 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
         ),
         bottomNavigationBar: ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30.0),
-            topRight: Radius.circular(30.0),
+            topLeft: Radius.circular(25.0),
+            topRight: Radius.circular(25.0),
           ),
           child: BottomAppBar(
             color: kColor,
