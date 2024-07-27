@@ -6,7 +6,6 @@ import 'package:green_market/screens/buyer_screen.dart';
 import 'package:green_market/screens/community_screen.dart';
 import 'package:green_market/screens/farmer_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:green_market/screens/add_crop_screen.dart';
 
 class BottomBarScreen extends StatefulWidget {
   const BottomBarScreen({super.key});
@@ -24,7 +23,6 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     FarmerScreen(),
     BuyerScreen(),
     CommunityScreen(),
-    // AddCropScreen(),
   ];
 
   // Future<void> _loadModeState() async {
