@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "750742413285",
+    "project_id": "green-market-4",
+    "storage_bucket": "green-market-4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750742413285:android:1b1ac00de1c4314415190c",
+        "android_client_info": {
+          "package_name": "com.example.green_market"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATqG0IE4WecQYaoNX8sN9R9BAVhQ-KOBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

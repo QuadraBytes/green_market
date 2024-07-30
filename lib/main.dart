@@ -1,10 +1,25 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyBJUNKdSZCJ7wp2Z7suoLZTleLfQxZUl7E",
+            authDomain: "green-market-4.firebaseapp.com",
+            projectId: "green-market-4",
+            storageBucket: "green-market-4.appspot.com",
+            messagingSenderId: "750742413285",
+            appId: "1:750742413285:web:bd03d8351ccfbaa515190c"));
+  } else {
+    await Firebase.initializeApp();
+  }
+
   // runApp(const GreenMarket());
   runApp(
     DevicePreview(
