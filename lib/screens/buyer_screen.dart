@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
+import 'package:green_market/screens/add_requirement_screen.dart';
 
 class BuyerScreen extends StatefulWidget {
   const BuyerScreen({super.key});
@@ -160,8 +161,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                     children: districts
                                         .map((district) => ListTile(
                                               title: Text(district),
-                                              onTap: () {
-                                              },
+                                              onTap: () {},
                                             ))
                                         .toList(),
                                   ),
@@ -196,8 +196,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                         : index == weightRange.length - 1
                                             ? 'Above ${weightRange[index]} kg'
                                             : '${weightRange[index]} - ${weightRange[index + 1]} kg'),
-                                    onTap: () {
-                                    },
+                                    onTap: () {},
                                   ),
                                 ),
                               ),
@@ -226,8 +225,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                         : index == priceRange.length - 1
                                             ? 'Above Rs.${priceRange[index]}'
                                             : 'Rs.${priceRange[index]} - ${priceRange[index + 1]}'),
-                                    onTap: () {
-                                    },
+                                    onTap: () {},
                                   ),
                                 ),
                               ),
@@ -282,7 +280,12 @@ class _BuyerScreenState extends State<BuyerScreen> {
       floatingActionButton: ClipRRect(
         borderRadius: BorderRadius.circular(50),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddRequirementScreen()),
+            );
+          },
           child: Icon(
             Icons.add,
             size: 35,

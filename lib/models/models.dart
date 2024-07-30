@@ -46,4 +46,7 @@ const weightRange = [
   6
 ];
 
-
+const groupType = [
+  'Single',
+  'Group'
+];
