@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_crop_screen.dart';
+import 'package:green_market/screens/profile_screen.dart';
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -11,11 +12,31 @@ class FarmerScreen extends StatefulWidget {
 }
 
 class _FarmerScreenState extends State<FarmerScreen> {
+  bool showSearchBar = false;
   bool isDistrictExpanded = false;
   bool isWeightExpanded = false;
   bool isPriceExpanded = false;
   bool isAvailableSelected = false;
   bool isUpcomingSelected = false;
+  FocusNode searchFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    searchFocusNode.addListener(() {
+      if (!searchFocusNode.hasFocus) {
+        setState(() {
+          showSearchBar = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    searchFocusNode.dispose();
+    super.dispose();
+  }
 
   void _showCropDetails() {
     showModalBottomSheet(
@@ -399,225 +420,269 @@ class _FarmerScreenState extends State<FarmerScreen> {
         ),
       ),
       appBar: AppBar(
-        toolbarHeight: 75,
-        title: Container(
-          padding: EdgeInsets.only(top: 10),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.list,
-                  color: Colors.black,
-                  size: 35,
+        toolbarHeight: !showSearchBar ? 65 : 75,
+        title: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: Container(
+            padding: EdgeInsets.only(top: 10),
+            child: Row(
+              children: [
+                !showSearchBar
+                    ? IconButton(
+                        onPressed: () {},
+                        icon: Icon(
+                          Icons.list,
+                          color: Colors.black,
+                          size: 35,
+                        ),
+                      )
+                    : Container(),
+                !showSearchBar ? SizedBox(width: 10) : Container(),
+                Expanded(
+                  child: !showSearchBar
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                searchFocusNode.requestFocus();
+
+                                showSearchBar = !showSearchBar;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.search,
+                              color: Colors.black,
+                              size: 27.5,
+                            ),
+                          ),
+                        )
+                      : TextField(
+                          focusNode: searchFocusNode,
+                          decoration: InputDecoration(
+                            fillColor: const Color.fromRGBO(0, 0, 0, 0),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.black,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.mic_outlined,
+                              ),
+                            ),
+                            hintText: 'Search Crop',
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              borderSide:
+                                  BorderSide(width: 1, color: Colors.black),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              borderSide:
+                                  BorderSide(width: 2, color: Colors.black),
+                            ),
+                            filled: true,
+                          ),
+                          style: TextStyle(fontSize: 15.0),
+                        ),
                 ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    fillColor: Colors.transparent,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.black,
-                    ),
-                    suffixIcon: Icon(
-                      Icons.mic_outlined,
-                    ),
-                    hintText: 'Search Crop',
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(width: 1, color: Colors.black),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(width: 2, color: Colors.black),
-                    ),
-                    filled: true,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+                IconButton(
+                  icon: Icon(
+                    Icons.filter_alt_outlined,
+                    size: 30,
                   ),
-                  style: TextStyle(fontSize: 15.0),
+                  onPressed: () {
+                    _showFilterSheet(context);
+                  },
                 ),
-              ),
-              SizedBox(
-                width: 5,
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.filter_alt_outlined,
-                  size: 30,
-                ),
-                onPressed: () {
-                  _showFilterSheet(context);
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.person, size: 30),
-                onPressed: () {},
-              ),
-            ],
+                !showSearchBar
+                    ? IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileScreen()),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.person,
+                          color: Colors.black,
+                          size: 30,
+                        ),
+                      )
+                    : Container(),
+              ],
+            ),
           ),
         ),
       ),
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-        child: GestureDetector(
-          onTap: _showCropDetails,
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            color: kColor2,
-            child: Container(
-              height: size.height * 0.20,
-              padding: EdgeInsets.all(15.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image(
-                              width: size.width * 0.3,
-                              height: size.height * 0.125,
-                              fit: BoxFit.cover,
-                              image: AssetImage("assets/images/crop.jpg"),
+      body: GestureDetector(
+        onTap: () {
+          searchFocusNode.unfocus();
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15.0),
+          child: GestureDetector(
+            onTap: _showCropDetails,
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              color: kColor2,
+              child: Container(
+                height: size.height * 0.20,
+                padding: EdgeInsets.all(15.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image(
+                                width: size.width * 0.3,
+                                height: size.height * 0.125,
+                                fit: BoxFit.cover,
+                                image: AssetImage("assets/images/crop.jpg"),
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'Crop Name',
-                            style: TextStyle(
-                                color: Color(0xFF222325),
-                                fontSize: size.height * 0.0175,
-                                fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Farmer Name',
-                                style: TextStyle(
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              'Crop Name',
+                              style: TextStyle(
                                   color: Color(0xFF222325),
                                   fontSize: size.height * 0.0175,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Text(
-                                'District',
-                                style: TextStyle(
-                                    color: Color(0xFF072471),
-                                    fontSize: size.height * 0.015,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Text(
-                                'Weight',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: size.height * 0.015,
-                                    color: Color(0xFF222325)),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Text(
-                                'Price',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: size.height * 0.015,
-                                    color: Color(0xFF222325)),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    child: Row(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Container(
-                                            padding: EdgeInsets.zero,
-                                            color: kColor,
-                                            child: IconButton(
-                                              onPressed: () {},
-                                              icon: Icon(
-                                                size: 17,
-                                                Icons.chat_bubble,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Container(
-                                            padding: EdgeInsets.zero,
-                                            color: kColor,
-                                            child: IconButton(
-                                              onPressed: () {},
-                                              icon: Icon(
-                                                size: 17,
-                                                Icons.call,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Container(
-                                            padding: EdgeInsets.zero,
-                                            color: kColor,
-                                            child: IconButton(
-                                              onPressed: () {},
-                                              icon: Icon(
-                                                size: 17,
-                                                Icons.favorite,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Container(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Farmer Name',
+                                  style: TextStyle(
+                                    color: Color(0xFF222325),
+                                    fontSize: size.height * 0.0175,
                                   ),
-                                ],
-                              )
-                            ],
+                                ),
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Text(
+                                  'District',
+                                  style: TextStyle(
+                                      color: Color(0xFF072471),
+                                      fontSize: size.height * 0.015,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Text(
+                                  'Weight',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: size.height * 0.015,
+                                      color: Color(0xFF222325)),
+                                ),
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Text(
+                                  'Price',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: size.height * 0.015,
+                                      color: Color(0xFF222325)),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      child: Row(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Container(
+                                              padding: EdgeInsets.zero,
+                                              color: kColor,
+                                              child: IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  size: 17,
+                                                  Icons.chat_bubble,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Container(
+                                              padding: EdgeInsets.zero,
+                                              color: kColor,
+                                              child: IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  size: 17,
+                                                  Icons.call,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Container(
+                                              padding: EdgeInsets.zero,
+                                              color: kColor,
+                                              child: IconButton(
+                                                onPressed: () {},
+                                                icon: Icon(
+                                                  size: 17,
+                                                  Icons.favorite,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

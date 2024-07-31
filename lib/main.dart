@@ -3,12 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
+import 'package:green_market/screens/profile_screen.dart';
 
 import 'package:green_market/screens/splash_screen.dart';
 import 'package:green_market/screens/login_screen.dart';
 import 'package:green_market/screens/signin_screen.dart';
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +45,7 @@ class GreenMarket extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:Signin(),
+      home: BottomBarScreen(),
     );
   }
 }
