@@ -47,7 +47,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Add Crop",
+          "Add a Requirement",
         ),
         backgroundColor: kColor,
       ),

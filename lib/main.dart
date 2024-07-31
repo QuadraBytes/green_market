@@ -8,8 +8,6 @@ import 'package:green_market/screens/splash_screen.dart';
 import 'package:green_market/screens/login_screen.dart';
 import 'package:green_market/screens/signin_screen.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
@@ -46,7 +44,8 @@ class GreenMarket extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:Signin(),
+      // home:Signin(),
+      home: BottomBarScreen(),
     );
   }
 }
