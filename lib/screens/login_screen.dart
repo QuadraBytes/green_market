@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:green_market/screens/signin_screen.dart';
 
 
-
 class Login extends StatelessWidget {
  
   const Login({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
   
@@ -20,7 +19,7 @@ class Login extends StatelessWidget {
             Container(
               height: MediaQuery.of(context).size.height * 0.4,
               width: MediaQuery.of(context).size.width * 0.5,
-              child: Image.asset("assets/images/Background.jpg"),
+              child: Image.asset("assets/images/Background.png"),
             ),
          //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
           const Text(  "LOGIN", 
