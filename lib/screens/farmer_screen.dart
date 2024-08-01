@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
+import 'package:green_market/screens/add_crop_screen.dart';
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -383,7 +384,12 @@ class _FarmerScreenState extends State<FarmerScreen> {
       floatingActionButton: ClipRRect(
         borderRadius: BorderRadius.circular(50),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddCropScreen()),
+            );
+          },
           child: Icon(
             Icons.add,
             size: 35,
