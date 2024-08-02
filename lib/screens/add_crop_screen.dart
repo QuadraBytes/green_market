@@ -3,6 +3,7 @@ import 'package:green_market/components/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:green_market/models/models.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddCropScreen extends StatefulWidget {
   const AddCropScreen({super.key});
@@ -12,14 +13,14 @@ class AddCropScreen extends StatefulWidget {
 }
 
 class _AddCropScreenState extends State<AddCropScreen> {
+  // Existing variables
   final _formKey = GlobalKey<FormState>();
   String? _farmerName;
   String? _district;
   String? _address;
   String? _phoneNumber;
   String? _cultivatedArea;
-  String? _groupType;
-
+  int? _cropType;
   String? _farmerType;
   int? _weight;
   DateTime? _availableDate;
@@ -28,6 +29,9 @@ class _AddCropScreenState extends State<AddCropScreen> {
   List<File> _images = [];
 
   final ImagePicker _picker = ImagePicker();
+
+  final CollectionReference cropsCollection =
+      FirebaseFirestore.instance.collection('crops');
 
   Future<void> _selectDate(BuildContext context, bool isAvailableDate) async {
     final DateTime? picked = await showDatePicker(
@@ -60,6 +64,37 @@ class _AddCropScreenState extends State<AddCropScreen> {
     setState(() {
       _images.removeAt(index);
     });
+  }
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      try {
+        await cropsCollection.add({
+          'farmerName': _farmerName,
+          'district': _district,
+          'address': _address,
+          'phoneNumber': _phoneNumber,
+          'cultivatedArea': _cultivatedArea,
+          'cropType': _cropType,
+          'farmerType': _farmerType,
+          'weight': _weight,
+          'availableDate': _availableDate,
+          'expiringDate': _expiringDate,
+          'price': _price,
+          'images': _images.map((image) => image.path).toList(),
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Crop added successfully'),
+          backgroundColor: kColor,
+        ));
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Failed to add crop: $e'),
+            backgroundColor: Colors.red));
+      }
+    }
   }
 
   @override
@@ -409,13 +444,15 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     ],
                   ),
                   SizedBox(height: 15),
-                  // _image == null ? Text('No image selected.') : Image.file(_image!),
-                  // ElevatedButton(
-                  //   onPressed: _pickImage,
-                  //   child: Text('Upload Photo'),
-                  // ),
-
-                  GestureDetector(
+                ],
+              ),
+              SizedBox(height: 15),
+              // _image == null ? Text('No image selected.') : Image.file(_image!),
+              // ElevatedButton(
+              //   onPressed: _pickImage,
+              //   child: Text('Upload Photo'),
+              // ),
+             GestureDetector(
                     onTap: _images.length == 2 ? null : _pickImage,
                     child: AbsorbPointer(
                       child: TextFormField(
@@ -436,7 +473,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 15),
+              SizedBox(height: 15),
+       
                   Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 10,
@@ -455,42 +493,33 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         ],
                       );
                     }).toList(),
+                 ),
+              SizedBox(height: 30),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 168, 165, 165)),
                   ),
-                  SizedBox(height: 30),
-                  Column(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white, fontSize: 15),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Color.fromARGB(255, 168, 165, 165)),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-                            // Submit button action
-                            // Handle form submission here
-                          }
-                        },
-                        child: Text(
-                          'Submit',
-                          style: TextStyle(color: Colors.white, fontSize: 15),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kColor,
-                        ),
-                      ),
-                    ],
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    child: Text(
+                      'Submit',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kColor,
+                    ),
                   ),
                 ],
               ),

@@ -17,7 +17,7 @@ class Signin extends StatelessWidget {
             Container(
               height: MediaQuery.of(context).size.height * 0.4,
               width: MediaQuery.of(context).size.width * 0.5,
-              child: Image.asset("assets/images/Background.jpg"),
+              child: Image.asset("assets/images/Background.png"),
             ),
          //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
           const Text(  "REGISTER NOW", 

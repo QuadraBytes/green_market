@@ -38,6 +38,7 @@ dependencies:
   device_preview: ^1.2.0
   image_picker: ^1.1.2
   firebase_core: ^3.2.0
+  cloud_firestore: ^5.2.0
   shared_preferences: ^2.2.3
   toggle_switch: ^2.3.0
 
@@ -67,13 +68,12 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/crop.jpg
+    - assets/images/Background.png
     - assets/images/Background.jpg
     - assets/images/appbar.png
     - assets/images/appbar1.png
     - assets/images/appbar2.png
     - assets/images/profile.png
-
-
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
