@@ -20,7 +20,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
   String? _address;
   String? _phoneNumber;
   String? _cultivatedArea;
-  String? _cropType;
+  int? _cropType;
   String? _farmerType;
   int? _weight;
   DateTime? _availableDate;
@@ -84,12 +84,15 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'price': _price,
           'images': _images.map((image) => image.path).toList(),
         });
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Crop added successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Crop added successfully'),
+          backgroundColor: kColor,
+        ));
         Navigator.pop(context);
       } catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to add crop: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Failed to add crop: $e'),
+            backgroundColor: Colors.red));
       }
     }
   }
@@ -222,7 +225,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          _cropType = value as String?;
+                          _cropType = value;
                         });
                       },
                       validator: (value) {
@@ -287,7 +290,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          _farmerType = value;
+                          _farmerType = value as String;
                         });
                       },
                       validator: (value) {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+
 import 'package:green_market/models/models.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddRequirementScreen extends StatefulWidget {
   const AddRequirementScreen({super.key});
@@ -13,20 +13,16 @@ class AddRequirementScreen extends StatefulWidget {
 
 class _AddRequirementScreenState extends State<AddRequirementScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? _farmerName;
+  String? _buyerName;
   String? _district;
   String? _address;
   String? _phoneNumber;
-  String? _cultivatedArea;
-  String? _groupType;
-
-  String? _farmerType;
+  int? _cropType;
   int? _weight;
   DateTime? _requiredDate;
-  int? _price;
-  List<File> _images = [];
 
-  final ImagePicker _picker = ImagePicker();
+  final CollectionReference requirements =
+      FirebaseFirestore.instance.collection('requirements');
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -39,6 +35,37 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
       setState(() {
         _requiredDate = picked;
       });
+    }
+  }
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      try {
+        await requirements.add({
+          'buyerName': _buyerName,
+          'district': _district,
+          'address': _address,
+          'phoneNumber': _phoneNumber,
+          'cropType': _cropType,
+          'weight': _weight,
+          'requiredDate': _requiredDate,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Requirement added successfully'),
+            backgroundColor: kColor,
+          ),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add requirement'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -67,7 +94,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                   return null;
                 },
                 onSaved: (value) {
-                  _farmerName = value;
+                  _buyerName = value;
                 },
               ),
               SizedBox(height: 15),
@@ -172,7 +199,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          _weight = value;
+                          _cropType = value;
                         });
                       },
                       validator: (value) {
@@ -264,13 +291,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                     height: 10,
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        // Submit button action
-                        // Handle form submission here
-                      }
-                    },
+                    onPressed: _submitForm,
                     child: Text(
                       'Submit',
                       style: TextStyle(color: Colors.white),
