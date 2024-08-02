@@ -22,19 +22,9 @@ class _BuyerScreenState extends State<BuyerScreen> {
   bool isUpcomingSelected = false;
   FocusNode searchFocusNode = FocusNode();
 
-  bool isBuyerMode = false;
-
-  Future<void> loadModeState() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isBuyerMode = prefs.getBool('isBuyerMode') ?? false;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    loadModeState();
     searchFocusNode.addListener(() {
       if (!searchFocusNode.hasFocus) {
         setState(() {
@@ -309,277 +299,279 @@ class _BuyerScreenState extends State<BuyerScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      floatingActionButton: isBuyerMode
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(50),
-              child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddRequirementScreen()),
-                  );
-                },
-                child: Icon(
-                  Icons.add,
-                  size: 35,
-                  color: Colors.white,
+    return SafeArea(
+      child: Scaffold(
+        floatingActionButton: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddRequirementScreen()),
+                    );
+                  },
+                  child: Icon(
+                    Icons.add,
+                    size: 35,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: kColor,
                 ),
-                backgroundColor: kColor,
-              ),
-            )
-          : null,
-      appBar: AppBar(
-        toolbarHeight: !showSearchBar ? 65 : 75,
-        title: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: Container(
-            padding: EdgeInsets.only(top: 10),
-            child: Row(
-              children: [
-                !showSearchBar
-                    ? IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.list,
-                          color: Colors.black,
-                          size: 35,
-                        ),
-                      )
-                    : Container(),
-                !showSearchBar ? SizedBox(width: 10) : Container(),
-                Expanded(
-                  child: !showSearchBar
-                      ? Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                searchFocusNode.requestFocus();
-
-                                showSearchBar = !showSearchBar;
-                              });
-                            },
-                            icon: Icon(
-                              Icons.search,
-                              color: Colors.black,
-                              size: 27.5,
-                            ),
+              )
+          ,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: !showSearchBar ? 65 : 75,
+          title: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+            child: Container(
+              padding: EdgeInsets.only(top: 10),
+              child: Row(
+                children: [
+                  !showSearchBar
+                      ? IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.list,
+                            color: Colors.black,
+                            size: 35,
                           ),
                         )
-                      : TextField(
-                          focusNode: searchFocusNode,
-                          decoration: InputDecoration(
-                            fillColor: const Color.fromRGBO(0, 0, 0, 0),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Colors.black,
-                            ),
-                            suffixIcon: IconButton(
-                              onPressed: () {},
+                      : Container(),
+                  !showSearchBar ? SizedBox(width: 10) : Container(),
+                  Expanded(
+                    child: !showSearchBar
+                        ? Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  searchFocusNode.requestFocus();
+      
+                                  showSearchBar = !showSearchBar;
+                                });
+                              },
                               icon: Icon(
-                                Icons.mic_outlined,
+                                Icons.search,
+                                color: Colors.black,
+                                size: 27.5,
                               ),
                             ),
-                            hintText: 'Search Crop',
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide(width: 1, color: Colors.black),
+                          )
+                        : TextField(
+                            focusNode: searchFocusNode,
+                            decoration: InputDecoration(
+                              fillColor: const Color.fromRGBO(0, 0, 0, 0),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: Colors.black,
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.mic_outlined,
+                                ),
+                              ),
+                              hintText: 'Search Crop',
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                                borderSide:
+                                    BorderSide(width: 1, color: Colors.black),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                                borderSide:
+                                    BorderSide(width: 2, color: Colors.black),
+                              ),
+                              filled: true,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                              borderSide:
-                                  BorderSide(width: 2, color: Colors.black),
-                            ),
-                            filled: true,
+                            style: TextStyle(fontSize: 15.0),
                           ),
-                          style: TextStyle(fontSize: 15.0),
-                        ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.filter_alt_outlined,
-                    size: 30,
                   ),
-                  onPressed: () {
-                    _showFilterSheet(context);
-                  },
-                ),
-                !showSearchBar
-                    ? IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => FavouritesScreen()),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.favorite,
-                          color: Colors.black,
-                          size: 30,
-                        ),
-                      )
-                    : Container(),
-                !showSearchBar
-                    ? IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ProfileScreen()),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.person,
-                          color: Colors.black,
-                          size: 30,
-                        ),
-                      )
-                    : Container(),
-              ],
+                  IconButton(
+                    icon: Icon(
+                      Icons.filter_alt_outlined,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      _showFilterSheet(context);
+                    },
+                  ),
+                  !showSearchBar
+                      ? IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => FavouritesScreen()),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.favorite,
+                            color: Colors.black,
+                            size: 30,
+                          ),
+                        )
+                      : Container(),
+                  !showSearchBar
+                      ? IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ProfileScreen()),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.person,
+                            color: Colors.black,
+                            size: 30,
+                          ),
+                        )
+                      : Container(),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          searchFocusNode.unfocus();
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 15.0),
-          child: Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            color: kColor2,
-            child: Container(
-              height: size.height * 0.23,
-              padding: EdgeInsets.all(15.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Crop Name',
-                              style: TextStyle(
+        body: GestureDetector(
+          onTap: () {
+            searchFocusNode.unfocus();
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 15.0),
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              color: kColor2,
+              child: Container(
+                height: size.height * 0.23,
+                padding: EdgeInsets.all(15.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Crop Name',
+                                style: TextStyle(
+                                    color: Color(0xFF222325),
+                                    fontSize: size.height * 0.0175,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Buyer Name',
+                                style: TextStyle(
                                   color: Color(0xFF222325),
                                   fontSize: size.height * 0.0175,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Buyer Name',
-                              style: TextStyle(
-                                color: Color(0xFF222325),
-                                fontSize: size.height * 0.0175,
+                                ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Text(
-                              'District',
-                              style: TextStyle(
-                                  color: Color(0xFF072471),
-                                  fontSize: size.height * 0.015,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Text(
-                              'Required Weight',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: size.height * 0.015,
-                                  color: Color(0xFF222325)),
-                            ),
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Text(
-                              'Required Date',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: size.height * 0.015,
-                                  color: Color(0xFF222325)),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    padding: EdgeInsets.zero,
-                                    color: kColor,
-                                    child: IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        size: 17,
-                                        Icons.chat_bubble,
-                                        color: Colors.white,
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                'District',
+                                style: TextStyle(
+                                    color: Color(0xFF072471),
+                                    fontSize: size.height * 0.015,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                'Required Weight',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: size.height * 0.015,
+                                    color: Color(0xFF222325)),
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                'Required Date',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: size.height * 0.015,
+                                    color: Color(0xFF222325)),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      padding: EdgeInsets.zero,
+                                      color: kColor,
+                                      child: IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          size: 17,
+                                          Icons.chat_bubble,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    padding: EdgeInsets.zero,
-                                    color: kColor,
-                                    child: IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        size: 17,
-                                        Icons.call,
-                                        color: Colors.white,
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      padding: EdgeInsets.zero,
+                                      color: kColor,
+                                      child: IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          size: 17,
+                                          Icons.call,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    padding: EdgeInsets.zero,
-                                    color: kColor,
-                                    child: IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        size: 17,
-                                        Icons.favorite,
-                                        color: Colors.white,
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      padding: EdgeInsets.zero,
+                                      color: kColor,
+                                      child: IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          size: 17,
+                                          Icons.favorite,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
+                                ],
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -31,7 +31,6 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     });
   }
 
-
   @override
   void initState() {
     super.initState();

@@ -69,7 +69,7 @@ flutter:
   assets:
     - assets/images/crop.jpg
     - assets/images/Background.png
-    - assets/images/Background.jpg
+    # - assets/images/Background.jpg
     - assets/images/appbar.png
     - assets/images/appbar1.png
     - assets/images/appbar2.png
