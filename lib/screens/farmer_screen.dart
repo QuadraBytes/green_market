@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_crop_screen.dart';
+import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -20,9 +22,19 @@ class _FarmerScreenState extends State<FarmerScreen> {
   bool isUpcomingSelected = false;
   FocusNode searchFocusNode = FocusNode();
 
+  bool isBuyerMode = false;
+
+  Future<void> loadModeState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isBuyerMode = prefs.getBool('isBuyerMode') ?? false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    loadModeState();
     searchFocusNode.addListener(() {
       if (!searchFocusNode.hasFocus) {
         setState(() {
@@ -402,23 +414,25 @@ class _FarmerScreenState extends State<FarmerScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      floatingActionButton: ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddCropScreen()),
-            );
-          },
-          child: Icon(
-            Icons.add,
-            size: 35,
-            color: Colors.white,
-          ),
-          backgroundColor: kColor,
-        ),
-      ),
+      floatingActionButton: isBuyerMode
+          ? null
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddCropScreen()),
+                  );
+                },
+                child: Icon(
+                  Icons.add,
+                  size: 35,
+                  color: Colors.white,
+                ),
+                backgroundColor: kColor,
+              ),
+            ),
       appBar: AppBar(
         toolbarHeight: !showSearchBar ? 65 : 75,
         title: GestureDetector(
@@ -498,6 +512,22 @@ class _FarmerScreenState extends State<FarmerScreen> {
                     _showFilterSheet(context);
                   },
                 ),
+                !showSearchBar
+                    ? IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FavouritesScreen()),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.favorite,
+                          color: Colors.black,
+                          size: 30,
+                        ),
+                      )
+                    : Container(),
                 !showSearchBar
                     ? IconButton(
                         onPressed: () {
