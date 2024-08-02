@@ -68,6 +68,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
       if (_farmerName == null ||
           _district == null ||
           _address == null ||
@@ -85,7 +87,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
         return;
       }
 
-      _formKey.currentState!.save();
       try {
         await cropsCollection.add({
           'farmerName': _farmerName,
@@ -257,7 +258,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                _weight = value;
+                                _cropType = value;
                               });
                             },
                             // validator: (value) {

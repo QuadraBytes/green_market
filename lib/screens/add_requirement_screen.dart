@@ -40,6 +40,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      
       if (_buyerName == null ||
           _district == null ||
           _address == null ||
