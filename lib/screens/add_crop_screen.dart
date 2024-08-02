@@ -100,328 +100,350 @@ class _AddCropScreenState extends State<AddCropScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Add Crop"),
-        backgroundColor: kColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                style: TextStyle(fontWeight: FontWeight.w500),
-                decoration: InputDecoration(labelText: "Farmer's Name"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter farmer's name";
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _farmerName = value;
-                },
-              ),
-              SizedBox(height: 15),
-              DropdownButtonFormField<String>(
-                menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
-                decoration: InputDecoration(
-                  labelText: 'District',
-                  // suffixIcon: Icon(
-                  //   Icons.keyboard_arrow_down_outlined,
-                  //   size: 30,
-                  // ),
-                ),
-                icon: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(
-                    Icons.keyboard_arrow_down_outlined,
-                    size: 25,
-                  ),
-                ),
-                items: districts.map((String district) {
-                  return DropdownMenuItem<String>(
-                    value: district,
-                    child: Text(district),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _district = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a district';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 15),
-              TextFormField(
-                style: TextStyle(fontWeight: FontWeight.w500),
-                decoration: InputDecoration(
-                    labelText: 'Address',
-                    hintText: 'Eg: No, Street, City',
-                    hintStyle: TextStyle(
-                        color: Colors.grey, fontWeight: FontWeight.normal),
-                    suffixIcon: Icon(
-                      Icons.location_on,
-                      size: 20,
-                    )),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter address';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _address = value;
-                },
-              ),
-              SizedBox(height: 15),
-              Row(
+      // appBar: AppBar(
+      //   title: Text("Add Crop"),
+      //   backgroundColor: kColor,
+      // ),
+      body: Stack(
+        children: [
+          Positioned(top: -15, child: Image.asset('assets/images/appbar2.png')),
+          Container(
+            padding: const EdgeInsets.only(left: 20.0, right: 20),
+            child: Form(
+              key: _formKey,
+              child: ListView(
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          prefixText: '+94 ',
-                          prefixStyle: TextStyle(fontWeight: FontWeight.w500),
-                          hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.normal),
-                          hintText: 'XX XXX XXX'),
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter phone number';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        _phoneNumber = value;
-                      },
-                    ),
+                  SizedBox(
+                    height: 10,
                   ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: DropdownButtonFormField<int>(
-                      decoration: InputDecoration(labelText: 'Crop Type'),
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.keyboard_arrow_down_outlined,
-                          size: 25,
-                        ),
+                  Text('Add Crop',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white)),
+                  SizedBox(
+                    height: 60,
+                  ),
+                  TextFormField(
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                    decoration: InputDecoration(labelText: "Farmer's Name"),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter farmer's name";
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _farmerName = value;
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  DropdownButtonFormField<String>(
+                    menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
+                    decoration: InputDecoration(
+                      labelText: 'District',
+                      // suffixIcon: Icon(
+                      //   Icons.keyboard_arrow_down_outlined,
+                      //   size: 30,
+                      // ),
+                    ),
+                    icon: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_outlined,
+                        size: 25,
                       ),
-                      items: weightRange.map((int weight) {
-                        return DropdownMenuItem<int>(
-                          value: weight,
-                          child: Text('$weight kg',
-                              style: TextStyle(fontSize: 16)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _cropType = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a crop type';
-                        }
-                        return null;
-                      },
                     ),
+                    items: districts.map((String district) {
+                      return DropdownMenuItem<String>(
+                        value: district,
+                        child: Text(district),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _district = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select a district';
+                      }
+                      return null;
+                    },
                   ),
-                ],
-              ),
-              SizedBox(height: 15),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<int>(
-                      decoration: InputDecoration(labelText: 'Weight'),
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.keyboard_arrow_down_outlined,
-                          size: 25,
-                        ),
-                      ),
-                      items: weightRange.map((int weight) {
-                        return DropdownMenuItem<int>(
-                          value: weight,
-                          child: Text('$weight kg',
-                              style: TextStyle(fontSize: 16)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _weight = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a weight';
-                        }
-                        return null;
-                      },
-                    ),
+                  SizedBox(height: 15),
+                  TextFormField(
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                    decoration: InputDecoration(
+                        labelText: 'Address',
+                        hintText: 'Eg: No, Street, City',
+                        hintStyle: TextStyle(
+                            color: const Color.fromRGBO(158, 158, 158, 1),
+                            fontWeight: FontWeight.normal),
+                        suffixIcon: Icon(
+                          Icons.location_on,
+                          size: 20,
+                        )),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter address';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _address = value;
+                    },
                   ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: InputDecoration(labelText: 'Single/Group'),
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.keyboard_arrow_down_outlined,
-                          size: 25,
-                        ),
-                      ),
-                      items: groupType.map((String type) {
-                        return DropdownMenuItem<String>(
-                          value: type,
-                          child: Text(type, style: TextStyle(fontSize: 16)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _farmerType = value as String;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a farmer type';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 15),
-              // ListTile(
-              //   title: Text(
-              //       "Available Date: ${_availableDate?.toLocal().toIso8601String().substring(0, 10) ?? 'Not selected'}"),
-              //   trailing: Icon(Icons.calendar_today),
-              //   onTap: () => _selectDate(context, true),
-              // ),
-              // ListTile(
-              //   title: Text(
-              //       "Expiring Date: ${_expiringDate?.toLocal().toIso8601String().substring(0, 10) ?? 'Not selected'}"),
-              //   trailing: Icon(Icons.calendar_today),
-              //   onTap: () => _selectDate(context, false),
-              // ),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _selectDate(context, true),
-                      child: AbsorbPointer(
+                  SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(
-                              labelText: 'Available Date',
-                              suffixIcon: Icon(Icons.calendar_today)),
-                          controller: TextEditingController(
-                            text: _availableDate == null
-                                ? ''
-                                : _availableDate
-                                    ?.toLocal()
-                                    .toIso8601String()
-                                    .substring(0, 10),
+                              labelText: 'Phone Number',
+                              prefixText: '+94 ',
+                              prefixStyle:
+                                  TextStyle(fontWeight: FontWeight.w500),
+                              hintStyle: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.normal),
+                              hintText: 'XX XXX XXX'),
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter phone number';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _phoneNumber = value;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          decoration: InputDecoration(labelText: 'Crop Type'),
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_outlined,
+                              size: 25,
+                            ),
                           ),
+                          items: weightRange.map((int weight) {
+                            return DropdownMenuItem<int>(
+                              value: weight,
+                              child: Text('$weight kg',
+                                  style: TextStyle(fontSize: 16)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _weight = value;
+                            });
+                          },
                           validator: (value) {
-                            if (_availableDate == null) {
-                              return 'Please select the available date';
+                            if (value == null) {
+                              return 'Please select a crop type';
                             }
                             return null;
                           },
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _selectDate(context, false),
-                      child: AbsorbPointer(
+                  SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          decoration: InputDecoration(labelText: 'Weight'),
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_outlined,
+                              size: 25,
+                            ),
+                          ),
+                          items: weightRange.map((int weight) {
+                            return DropdownMenuItem<int>(
+                              value: weight,
+                              child: Text('$weight kg',
+                                  style: TextStyle(fontSize: 16)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _weight = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select a weight';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration:
+                              InputDecoration(labelText: 'Single/Group'),
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_outlined,
+                              size: 25,
+                            ),
+                          ),
+                          items: groupType.map((String type) {
+                            return DropdownMenuItem<String>(
+                              value: type,
+                              child: Text(type, style: TextStyle(fontSize: 16)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _groupType = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select a weight';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  // ListTile(
+                  //   title: Text(
+                  //       "Available Date: ${_availableDate?.toLocal().toIso8601String().substring(0, 10) ?? 'Not selected'}"),
+                  //   trailing: Icon(Icons.calendar_today),
+                  //   onTap: () => _selectDate(context, true),
+                  // ),
+                  // ListTile(
+                  //   title: Text(
+                  //       "Expiring Date: ${_expiringDate?.toLocal().toIso8601String().substring(0, 10) ?? 'Not selected'}"),
+                  //   trailing: Icon(Icons.calendar_today),
+                  //   onTap: () => _selectDate(context, false),
+                  // ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _selectDate(context, true),
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  labelText: 'Available Date',
+                                  suffixIcon: Icon(Icons.calendar_today)),
+                              controller: TextEditingController(
+                                text: _availableDate == null
+                                    ? ''
+                                    : _availableDate
+                                        ?.toLocal()
+                                        .toIso8601String()
+                                        .substring(0, 10),
+                              ),
+                              validator: (value) {
+                                if (_availableDate == null) {
+                                  return 'Please select the available date';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _selectDate(context, false),
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  labelText: 'Expire Date',
+                                  suffixIcon: Icon(Icons.calendar_today)),
+                              controller: TextEditingController(
+                                  text: _expiringDate == null
+                                      ? ''
+                                      : _expiringDate
+                                          ?.toLocal()
+                                          .toIso8601String()
+                                          .substring(0, 10)),
+                              validator: (value) {
+                                if (_expiringDate == null) {
+                                  return 'Please select the expire date';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<int>(
+                          menuMaxHeight:
+                              MediaQuery.of(context).size.height * 0.3,
+                          icon: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.keyboard_arrow_down_outlined,
+                              size: 25,
+                            ),
+                          ),
+                          decoration: InputDecoration(labelText: 'Price'),
+                          items: priceRange.map((int price) {
+                            return DropdownMenuItem<int>(
+                              value: price,
+                              child: Text('Rs. $price'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _price = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select a price';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
                         child: TextFormField(
                           decoration: InputDecoration(
-                              labelText: 'Expire Date',
-                              suffixIcon: Icon(Icons.calendar_today)),
-                          controller: TextEditingController(
-                              text: _expiringDate == null
-                                  ? ''
-                                  : _expiringDate
-                                      ?.toLocal()
-                                      .toIso8601String()
-                                      .substring(0, 10)),
+                              labelText: 'Cultivated Area', suffixText: 'ha'),
+                          style: TextStyle(fontWeight: FontWeight.w500),
                           validator: (value) {
-                            if (_expiringDate == null) {
-                              return 'Please select the expire date';
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter cultivated area';
                             }
                             return null;
                           },
+                          onSaved: (value) {
+                            _cultivatedArea = value;
+                          },
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 15),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<int>(
-                      menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.keyboard_arrow_down_outlined,
-                          size: 25,
-                        ),
-                      ),
-                      decoration: InputDecoration(labelText: 'Price'),
-                      items: priceRange.map((int price) {
-                        return DropdownMenuItem<int>(
-                          value: price,
-                          child: Text('Rs. $price'),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _price = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a price';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Cultivated Area', suffixText: 'ha'),
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter cultivated area';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        _cultivatedArea = value;
-                      },
-                    ),
-                  ),
+                  SizedBox(height: 15),
                 ],
               ),
               SizedBox(height: 15),
@@ -430,48 +452,48 @@ class _AddCropScreenState extends State<AddCropScreen> {
               //   onPressed: _pickImage,
               //   child: Text('Upload Photo'),
               // ),
-
-              // GestureDetector(
-              //   onTap: _images.length == 2 ? null : _pickImage,
-              //   child: AbsorbPointer(
-              //     child: TextFormField(
-              //       decoration: InputDecoration(
-              //           labelText: _images.length == 0
-              //               ? 'Upload Images (2)'
-              //               : _images.length == 1
-              //                   ? 'One Image is Uploaded'
-              //                   : 'Two Images are Uploaded',
-              //           suffixIcon: Icon(Icons.add_a_photo)),
-              //       style: TextStyle(fontWeight: FontWeight.w500),
-              //       validator: (_) {
-              //         if (_images.isEmpty) {
-              //           return 'Please add an image';
-              //         }
-              //         return null;
-              //       },
-              //     ),
-              //   ),
-              // ),
-              SizedBox(height: 15),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 10,
-                children: _images.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  File imageFile = entry.value;
-                  return Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      Image.file(imageFile,
-                          width: 150, height: 150, fit: BoxFit.contain),
-                      IconButton(
-                        icon: Icon(Icons.cancel, color: kColor),
-                        onPressed: () => _removeImage(index),
+             GestureDetector(
+                    onTap: _images.length == 2 ? null : _pickImage,
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            labelText: _images.length == 0
+                                ? 'Upload Images (2)'
+                                : _images.length == 1
+                                    ? 'One Image is Uploaded'
+                                    : 'Two Images are Uploaded',
+                            suffixIcon: Icon(Icons.add_a_photo)),
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                        validator: (_) {
+                          if (_images.isEmpty) {
+                            return 'Please add an image';
+                          }
+                          return null;
+                        },
                       ),
-                    ],
-                  );
-                }).toList(),
-              ),
+                    ),
+                  ),
+              SizedBox(height: 15),
+       
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 10,
+                    children: _images.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      File imageFile = entry.value;
+                      return Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          Image.file(imageFile,
+                              width: 150, height: 150, fit: BoxFit.contain),
+                          IconButton(
+                            icon: Icon(Icons.cancel, color: kColor),
+                            onPressed: () => _removeImage(index),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                 ),
               SizedBox(height: 30),
               Column(
                 children: [
@@ -501,9 +523,21 @@ class _AddCropScreenState extends State<AddCropScreen> {
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+              top: 50,
+              left: 10,
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )),
+        ],
       ),
     );
   }

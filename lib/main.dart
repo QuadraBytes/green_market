@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
+import 'package:green_market/screens/availability_screen.dart';
+import 'package:green_market/screens/favourites_screen.dart';
+import 'package:green_market/screens/profile_screen.dart';
 import 'package:green_market/screens/splash_screen.dart';
 import 'package:green_market/screens/login_screen.dart';
 import 'package:green_market/screens/signin_screen.dart';
@@ -44,8 +47,7 @@ class GreenMarket extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: kColor),
         useMaterial3: true,
       ),
-      home: Signin(),
-      // home: BottomBarScreen(),
+      home: BottomBarScreen(),
     );
   }
 }
