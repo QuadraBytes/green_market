@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_requirement_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BuyerScreen extends StatefulWidget {
@@ -21,10 +23,13 @@ class _BuyerScreenState extends State<BuyerScreen> {
   bool isAvailableSelected = false;
   bool isUpcomingSelected = false;
   FocusNode searchFocusNode = FocusNode();
+  late Stream<QuerySnapshot> _requireStream;
 
   @override
   void initState() {
     super.initState();
+    _requireStream =
+        FirebaseFirestore.instance.collection('requirements').snapshots();
     searchFocusNode.addListener(() {
       if (!searchFocusNode.hasFocus) {
         setState(() {
@@ -295,6 +300,11 @@ class _BuyerScreenState extends State<BuyerScreen> {
     );
   }
 
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    return DateFormat('yyyy-MM-dd').format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -302,24 +312,22 @@ class _BuyerScreenState extends State<BuyerScreen> {
     return SafeArea(
       child: Scaffold(
         floatingActionButton: ClipRRect(
-                borderRadius: BorderRadius.circular(50),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AddRequirementScreen()),
-                    );
-                  },
-                  child: Icon(
-                    Icons.add,
-                    size: 35,
-                    color: Colors.white,
-                  ),
-                  backgroundColor: kColor,
-                ),
-              )
-          ,
+          borderRadius: BorderRadius.circular(50),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddRequirementScreen()),
+              );
+            },
+            child: Icon(
+              Icons.add,
+              size: 35,
+              color: Colors.white,
+            ),
+            backgroundColor: kColor,
+          ),
+        ),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           toolbarHeight: !showSearchBar ? 65 : 75,
@@ -350,7 +358,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                               onPressed: () {
                                 setState(() {
                                   searchFocusNode.requestFocus();
-      
+
                                   showSearchBar = !showSearchBar;
                                 });
                               },
@@ -437,145 +445,267 @@ class _BuyerScreenState extends State<BuyerScreen> {
             ),
           ),
         ),
-        body: GestureDetector(
-          onTap: () {
-            searchFocusNode.unfocus();
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 15.0),
-            child: Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              color: kColor2,
-              child: Container(
-                height: size.height * 0.23,
-                padding: EdgeInsets.all(15.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
+        body: StreamBuilder(
+            stream: _requireStream,
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text('Something went wrong'),
+                );
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (snapshot.data!.docs.isEmpty) {
+                return Center(
+                  child: Text('No requirements found'),
+                );
+              }
+
+              return ListView(
+                children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                  Map<String, dynamic> data =
+                      document.data()! as Map<String, dynamic>;
+                  Timestamp timestamp = data['requiredDate'];
+                  String formattedDate = _formatTimestamp(timestamp);
+
+                  return GestureDetector(
+                    onTap: () {
+                      searchFocusNode.unfocus();
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(top: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Card(
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        color: kColor2,
+                        child: Container(
+                          height: size.height * 0.15,
+                          padding: EdgeInsets.all(15.0),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Crop Name',
-                                style: TextStyle(
-                                    color: Color(0xFF222325),
-                                    fontSize: size.height * 0.0175,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                'Buyer Name',
-                                style: TextStyle(
-                                  color: Color(0xFF222325),
-                                  fontSize: size.height * 0.0175,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Text(
-                                'District',
-                                style: TextStyle(
-                                    color: Color(0xFF072471),
-                                    fontSize: size.height * 0.015,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Text(
-                                'Required Weight',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: size.height * 0.015,
-                                    color: Color(0xFF222325)),
-                              ),
-                              SizedBox(
-                                height: 3,
-                              ),
-                              Text(
-                                'Required Date',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: size.height * 0.015,
-                                    color: Color(0xFF222325)),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Container(
-                                      padding: EdgeInsets.zero,
-                                      color: kColor,
-                                      child: IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(
-                                          size: 17,
-                                          Icons.chat_bubble,
-                                          color: Colors.white,
+                                  Container(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: size.width * 0.8,
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                data['cropType'],
+                                                style: TextStyle(
+                                                    color: Color(0xFF222325),
+                                                    fontSize:
+                                                        size.height * 0.0175,
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                              Spacer(),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on,
+                                                    color: Colors.red,
+                                                    size: 15,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                    data['district'],
+                                                    style: TextStyle(
+                                                        color: kColor4,
+                                                        fontSize:
+                                                            size.height * 0.015,
+                                                        fontWeight:
+                                                            FontWeight.w600),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Container(
-                                      padding: EdgeInsets.zero,
-                                      color: kColor,
-                                      child: IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(
-                                          size: 17,
-                                          Icons.call,
-                                          color: Colors.white,
+                                        SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.person,
+                                              color: Colors.black,
+                                              size: 17.5,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              data['buyerName'],
+                                              style: TextStyle(
+                                                color: Color(0xFF222325),
+                                                fontSize: size.height * 0.0175,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Container(
-                                      padding: EdgeInsets.zero,
-                                      color: kColor,
-                                      child: IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(
-                                          size: 17,
-                                          Icons.favorite,
-                                          color: Colors.white,
+                                        SizedBox(
+                                          height: 5,
                                         ),
-                                      ),
+                                        Container(
+                                          width: size.width * 0.8,
+                                          child: Row(
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        'Weight :',
+                                                        style: TextStyle(
+                                                            color: kColor4,
+                                                            fontSize:
+                                                                size.height *
+                                                                    0.015,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                        '${data['weight']} kg',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize:
+                                                                size.height *
+                                                                    0.015,
+                                                            color: Color(
+                                                                0xFF222325)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        'Required Date :',
+                                                        style: TextStyle(
+                                                            color: kColor4,
+                                                            fontSize:
+                                                                size.height *
+                                                                    0.015,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                        formattedDate,
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize:
+                                                                size.height *
+                                                                    0.015,
+                                                            color: Color(
+                                                                0xFF222325)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              // ClipRRect(
+                                              //   borderRadius:
+                                              //       BorderRadius.circular(10),
+                                              //   child: Container(
+                                              //     padding: EdgeInsets.zero,
+                                              //     color: kColor,
+                                              //     child: IconButton(
+                                              //       onPressed: () {},
+                                              //       icon: Icon(
+                                              //         size: 17,
+                                              //         Icons.chat_bubble,
+                                              //         color: Colors.white,
+                                              //       ),
+                                              //     ),
+                                              //   ),
+                                              // ),
+                                              // Spacer(),
+                                              // SizedBox(
+                                              //   width: 10,
+                                              // ),
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Container(
+                                                  padding: EdgeInsets.zero,
+                                                  color: kColor,
+                                                  child: IconButton(
+                                                    onPressed: () {},
+                                                    icon: Icon(
+                                                      size: 17,
+                                                      Icons.call,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Container(
+                                                  padding: EdgeInsets.zero,
+                                                  color: kColor,
+                                                  child: IconButton(
+                                                    onPressed: () {},
+                                                    icon: Icon(
+                                                      size: 17,
+                                                      Icons.favorite,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
                                 ],
-                              )
+                              ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+                  );
+                }).toList(),
+              );
+            }),
       ),
     );
   }
