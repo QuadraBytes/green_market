@@ -102,10 +102,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'price': _price,
           'images': _images.map((image) => image.path).toList(),
         });
-        await ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Crop added successfully'),
-          backgroundColor: kColor,
-        ));
+        
         Navigator.pop(context);
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

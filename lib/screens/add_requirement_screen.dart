@@ -64,12 +64,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
           'weight': _weight,
           'requiredDate': _requiredDate,
         });
-        await ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Requirement added successfully'),
-            backgroundColor: kColor,
-          ),
-        );
+       
         Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
