@@ -133,66 +133,6 @@ class _FarmerScreenState extends State<FarmerScreen> {
     updateUnionList();
   }
 
-  // Filter() {
-  //   List list = [];
-  //   for (var crop in cropList) {
-  //     bool isInclude = true;
-  //     if (selectedWeightRange.isNotEmpty) {
-  //       if (int.parse(selectedWeightRange[0]) < int.parse(crop['weight']) &&
-  //           int.parse(crop['weight']) < int.parse(selectedWeightRange[1])) {
-  //         isInclude = false;
-  //       }
-  //     }
-  //     if (selectedPriceRange.isNotEmpty) {
-  //       if (int.parse(selectedPriceRange[0]) < int.parse(crop['price']) &&
-  //           int.parse(crop['price']) < int.parse(selectedPriceRange[1])) {
-  //         isInclude = false;
-  //       }
-  //     }
-  //     if (selectedDistrict != '') {
-  //       if (crop['district'].toString() == selectedDistrict) {
-  //         isInclude = false;
-  //       }
-  //     }
-  //     if (isAvailableSelected) {
-  //       Timestamp availableDateTimestamp = crop['availableDate'];
-  //       DateTime availableDate = availableDateTimestamp.toDate();
-  //       if (availableDate.isAfter(DateTime.now())) {
-  //         isInclude = false;
-  //       }
-  //     }
-  //     if (isUpcomingSelected) {
-  //       Timestamp expireDateTimestamp = crop['expiringDate'];
-  //       DateTime expireDate = expireDateTimestamp.toDate();
-  //       if (expireDate.isAfter(DateTime.now())) {
-  //         isInclude = false;
-  //       }
-  //     }
-  //     if (isInclude) {
-  //       list.add(crop);
-  //     }
-  //   }
-  //   setState(() {
-  //     searchList = list;
-  //   });
-  // }
-
-  // districtFilter() {
-  //   if (selectedDistrict != '') {
-  //     List list = [];
-  //     for (var crop in searchList) {
-  //       if (crop['district'].toString() == selectedDistrict) {
-  //         list.add(crop);
-  //       }
-  //     }
-  //     setState(() {
-  //       searchList = list;
-  //     });
-  //   } else {
-  //     getAllCrops();
-  //   }
-  // }
-
   String _formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
     return DateFormat('yyyy-MM-dd').format(dateTime);
@@ -932,6 +872,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    var height = size.height * 0.15;
 
     return SafeArea(
       child: Scaffold(
@@ -954,121 +895,184 @@ class _FarmerScreenState extends State<FarmerScreen> {
         ),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          toolbarHeight: !showSearchBar ? 65 : 75,
-          title: GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(FocusNode());
-            },
-            child: Container(
-              padding: EdgeInsets.only(top: 10),
-              child: Row(
-                children: [
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.list,
-                            color: Colors.black,
-                            size: 35,
-                          ),
-                        )
-                      : Container(),
-                  !showSearchBar ? SizedBox(width: 10) : Container(),
-                  Expanded(
-                    child: !showSearchBar
-                        ? Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  searchFocusNode.requestFocus();
-                                  showSearchBar = !showSearchBar;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                                size: 27.5,
-                              ),
+          toolbarHeight: (selectedDistrict != '' ||
+                  selectedPriceRange.isNotEmpty ||
+                  selectedWeightRange.isNotEmpty)
+              ? showSearchBar
+                  ? 110
+                  : 100
+              : showSearchBar
+                  ? 70
+                  : 60,
+          title: Container(
+            padding: EdgeInsets.only(top: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    !showSearchBar
+                        ? IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.list,
+                              color: Colors.black,
+                              size: 35,
                             ),
                           )
-                        : TextField(
-                            controller: searchText,
-                            onChanged: (text) {
-                              searchFilter();
-                            },
-                            focusNode: searchFocusNode,
-                            decoration: InputDecoration(
-                              fillColor: const Color.fromRGBO(0, 0, 0, 0),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                              ),
-                              suffixIcon: IconButton(
-                                onPressed: () {},
+                        : Container(),
+                    !showSearchBar ? SizedBox(width: 10) : Container(),
+                    Expanded(
+                      child: !showSearchBar
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    searchFocusNode.requestFocus();
+                                    showSearchBar = !showSearchBar;
+                                  });
+                                },
                                 icon: Icon(
-                                  Icons.mic_outlined,
+                                  Icons.search,
+                                  color: Colors.black,
+                                  size: 27.5,
                                 ),
                               ),
-                              hintText: 'Search Crop',
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                                borderSide:
-                                    BorderSide(width: 1, color: Colors.black),
+                            )
+                          : TextField(
+                              controller: searchText,
+                              onChanged: (text) {
+                                searchFilter();
+                              },
+                              focusNode: searchFocusNode,
+                              decoration: InputDecoration(
+                                fillColor: const Color.fromRGBO(0, 0, 0, 0),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                ),
+                                suffixIcon: IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.mic_outlined,
+                                  ),
+                                ),
+                                hintText: 'Search Crop',
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  borderSide:
+                                      BorderSide(width: 1, color: Colors.black),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  borderSide:
+                                      BorderSide(width: 2, color: Colors.black),
+                                ),
+                                filled: true,
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                                borderSide:
-                                    BorderSide(width: 2, color: Colors.black),
-                              ),
-                              filled: true,
+                              style: TextStyle(fontSize: 15.0),
                             ),
-                            style: TextStyle(fontSize: 15.0),
-                          ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.filter_alt_outlined,
-                      size: 30,
                     ),
-                    onPressed: () {
-                      _showFilterSheet(context);
-                    },
+                    IconButton(
+                      icon: Icon(
+                        Icons.filter_alt_outlined,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        _showFilterSheet(context);
+                      },
+                    ),
+                    !showSearchBar
+                        ? IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => FavouritesScreen()),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.favorite,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
+                        : Container(),
+                    !showSearchBar
+                        ? IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfileScreen()),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.person,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
+                        : Container(),
+                  ],
+                ),
+                !showSearchBar
+                    ? Container()
+                    : SizedBox(
+                        height: 10,
+                      ),
+                if (selectedDistrict.isNotEmpty ||
+                    selectedWeightRange.isNotEmpty ||
+                    selectedPriceRange.isNotEmpty)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Wrap(
+                            spacing: 8.0,
+                            children: [
+                              if (selectedDistrict.isNotEmpty)
+                                Chip(
+                                  label: Text(selectedDistrict),
+                                  onDeleted: () {
+                                    setState(() {
+                                      selectedDistrict = '';
+                                      Filter();
+                                    });
+                                  },
+                                ),
+                              if (selectedWeightRange.isNotEmpty)
+                                Chip(
+                                  label: Text(
+                                      '${selectedWeightRange.first} - ${selectedWeightRange.last} kg'),
+                                  onDeleted: () {
+                                    setState(() {
+                                      selectedWeightRange = [];
+                                      Filter();
+                                    });
+                                  },
+                                ),
+                              if (selectedPriceRange.isNotEmpty)
+                                Chip(
+                                  label: Text(
+                                      'Rs.${selectedPriceRange.first} - Rs.${selectedPriceRange.last}'),
+                                  onDeleted: () {
+                                    setState(() {
+                                      selectedPriceRange = [];
+                                      Filter();
+                                    });
+                                  },
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => FavouritesScreen()),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.favorite,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      : Container(),
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProfileScreen()),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.person,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      : Container(),
-                ],
-              ),
+              ],
             ),
           ),
         ),

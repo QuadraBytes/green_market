@@ -6,7 +6,6 @@ import 'package:green_market/screens/add_requirement_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BuyerScreen extends StatefulWidget {
   const BuyerScreen({super.key});
@@ -16,20 +15,26 @@ class BuyerScreen extends StatefulWidget {
 }
 
 class _BuyerScreenState extends State<BuyerScreen> {
+  TextEditingController searchText = TextEditingController();
+  String selectedDistrict = '';
+  List<String> selectedWeightRange = [];
+  List<String> selectedPriceRange = [];
+  bool isAvailableSelected = false;
+  bool isUpcomingSelected = false;
+
   bool showSearchBar = false;
   bool isDistrictExpanded = false;
   bool isWeightExpanded = false;
-  bool isPriceExpanded = false;
-  bool isAvailableSelected = false;
-  bool isUpcomingSelected = false;
   FocusNode searchFocusNode = FocusNode();
-  late Stream<QuerySnapshot> _requireStream;
+  late List requireList = [];
+  late List searchList = [];
+  late List filterList = [];
+  late List unionRequireList = [];
 
   @override
   void initState() {
     super.initState();
-    _requireStream =
-        FirebaseFirestore.instance.collection('requirements').snapshots();
+    getAllCrops();
     searchFocusNode.addListener(() {
       if (!searchFocusNode.hasFocus) {
         setState(() {
@@ -43,6 +48,85 @@ class _BuyerScreenState extends State<BuyerScreen> {
   void dispose() {
     searchFocusNode.dispose();
     super.dispose();
+  }
+
+  getAllCrops() async {
+    var list =
+        await FirebaseFirestore.instance.collection('requirements').get();
+    setState(() {
+      requireList = list.docs;
+      searchList = requireList;
+      unionRequireList = requireList;
+    });
+  }
+
+  updateUnionList() {
+    unionRequireList =
+        searchList.toSet().intersection(filterList.toSet()).toList();
+    setState(() {});
+  }
+
+  searchFilter() {
+    if (searchText.text.isNotEmpty) {
+      String searchLower = searchText.text.toLowerCase();
+      List list = [];
+      for (var crop in requireList) {
+        if (crop['cropType'].toString().toLowerCase().contains(searchLower) ||
+            crop['buyerName'].toString().toLowerCase().contains(searchLower) ||
+            searchLower.contains(crop['cropType'].toString().toLowerCase()) ||
+            searchLower.contains(crop['buyerName'].toString().toLowerCase())) {
+          list.add(crop);
+        }
+      }
+      setState(() {
+        searchList = list;
+      });
+    }
+    updateUnionList();
+  }
+
+  Filter() {
+    List list = [];
+    for (var crop in requireList) {
+      bool isInclude = true;
+
+      if (selectedWeightRange.isNotEmpty) {
+        int cropWeight = int.parse(crop['weight']);
+        if (cropWeight < int.parse(selectedWeightRange[0]) ||
+            cropWeight > int.parse(selectedWeightRange[1])) {
+          isInclude = false;
+        }
+      }
+      if (selectedDistrict.isNotEmpty && crop['district'] != selectedDistrict) {
+        isInclude = false;
+      }
+
+      Timestamp requiredDateTimestamp = crop['requiredDate'];
+      DateTime requiredDate = requiredDateTimestamp.toDate();
+
+      if (isAvailableSelected) {
+        if (requiredDate.isAfter(DateTime.now())) {
+          isInclude = false;
+        }
+      }
+      if (isUpcomingSelected) {
+        if (requiredDate.isBefore(DateTime.now())) {
+          isInclude = false;
+        }
+      }
+      if (isInclude) {
+        list.add(crop);
+      }
+    }
+    setState(() {
+      filterList = list;
+    });
+    updateUnionList();
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    return DateFormat('yyyy-MM-dd').format(dateTime);
   }
 
   void _showFilterSheet(BuildContext context) {
@@ -89,6 +173,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                     } else {
                                       isAvailableSelected = true;
                                     }
+                                    Filter();
                                   });
                                 },
                                 child: Container(
@@ -130,6 +215,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                   } else {
                                     isUpcomingSelected = true;
                                   }
+                                  Filter();
                                 });
                               },
                               child: Container(
@@ -188,8 +274,34 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                   Column(
                                     children: districts
                                         .map((district) => ListTile(
-                                              title: Text(district),
-                                              onTap: () {},
+                                              title: selectedDistrict ==
+                                                      district
+                                                  ? Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.check,
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              255, 0, 110, 57),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(district)
+                                                      ],
+                                                    )
+                                                  : Text(district),
+                                              onTap: () {
+                                                if (selectedDistrict ==
+                                                    district) {
+                                                  selectedDistrict = '';
+                                                } else {
+                                                  selectedDistrict = district;
+                                                }
+                                                Navigator.pop(context);
+                                                _showFilterSheet(context);
+                                                Filter();
+                                              },
                                             ))
                                         .toList(),
                                   ),
@@ -219,45 +331,117 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                 children: List.generate(
                                   weightRange.length,
                                   (index) => ListTile(
-                                    title: Text(index == 0
-                                        ? 'Below ${weightRange[index]} kg'
+                                    title: index == 0
+                                        ? selectedWeightRange.contains('0') &&
+                                                selectedWeightRange.contains(
+                                                    weightRange[index])
+                                            ? Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.check,
+                                                    color: const Color.fromARGB(
+                                                        255, 0, 110, 57),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                      'Below ${weightRange[index]} kg'),
+                                                ],
+                                              )
+                                            : Text(
+                                                'Below ${weightRange[index]} kg')
                                         : index == weightRange.length - 1
-                                            ? 'Above ${weightRange[index]} kg'
-                                            : '${weightRange[index]} - ${weightRange[index + 1]} kg'),
-                                    onTap: () {},
+                                            ? selectedWeightRange.contains(
+                                                        weightRange[index]) &&
+                                                    selectedWeightRange
+                                                        .contains('1000')
+                                                ? Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 0, 110, 57),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                          'Above ${weightRange[index]} kg'),
+                                                    ],
+                                                  )
+                                                : Text(
+                                                    'Above ${weightRange[index]} kg')
+                                            : selectedWeightRange.contains(
+                                                        weightRange[index]) &&
+                                                    selectedWeightRange
+                                                        .contains(weightRange[
+                                                            index + 1])
+                                                ? Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 0, 110, 57),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                          '${weightRange[index]} - ${weightRange[index + 1]} kg'),
+                                                    ],
+                                                  )
+                                                : Text(
+                                                    '${weightRange[index]} - ${weightRange[index + 1]} kg'),
+                                    onTap: () {
+                                      if (index == 0) {
+                                        if (selectedWeightRange.contains('0') &&
+                                            selectedWeightRange
+                                                .contains(weightRange[index])) {
+                                          selectedWeightRange = [];
+                                        } else {
+                                          selectedWeightRange = [
+                                            '0',
+                                            weightRange[index]
+                                          ];
+                                        }
+                                      } else if (index ==
+                                          weightRange.length - 1) {
+                                        if (selectedWeightRange
+                                                .contains(weightRange[index]) &&
+                                            selectedWeightRange
+                                                .contains('1000')) {
+                                          selectedWeightRange = [];
+                                        } else {
+                                          selectedWeightRange = [
+                                            weightRange[index],
+                                            '1000'
+                                          ];
+                                        }
+                                      } else {
+                                        if (selectedWeightRange
+                                                .contains(weightRange[index]) &&
+                                            selectedWeightRange.contains(
+                                                weightRange[index + 1])) {
+                                          selectedWeightRange = [];
+                                        } else {
+                                          selectedWeightRange = [
+                                            weightRange[index],
+                                            weightRange[index + 1]
+                                          ];
+                                        }
+                                      }
+                                      print(selectedWeightRange);
+                                      Navigator.pop(context);
+                                      _showFilterSheet(context);
+                                      Filter();
+                                    },
                                   ),
                                 ),
                               ),
                               isExpanded: isWeightExpanded,
-                              canTapOnHeader: true,
-                            ),
-                            ExpansionPanel(
-                              backgroundColor: Colors.transparent,
-                              headerBuilder:
-                                  (BuildContext context, bool isExpanded) {
-                                return ListTile(
-                                  title: Text(
-                                    'Price',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                );
-                              },
-                              body: Column(
-                                children: List.generate(
-                                  priceRange.length,
-                                  (index) => ListTile(
-                                    title: Text(index == 0
-                                        ? 'Below Rs.${priceRange[index]}'
-                                        : index == priceRange.length - 1
-                                            ? 'Above Rs.${priceRange[index]}'
-                                            : 'Rs.${priceRange[index]} - ${priceRange[index + 1]}'),
-                                    onTap: () {},
-                                  ),
-                                ),
-                              ),
-                              isExpanded: isPriceExpanded,
                               canTapOnHeader: true,
                             ),
                           ],
@@ -267,19 +451,11 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                 isDistrictExpanded = !isDistrictExpanded;
                                 if (isDistrictExpanded) {
                                   isWeightExpanded = false;
-                                  isPriceExpanded = false;
                                 }
                               } else if (index == 1) {
                                 isWeightExpanded = !isWeightExpanded;
                                 if (isWeightExpanded) {
                                   isDistrictExpanded = false;
-                                  isPriceExpanded = false;
-                                }
-                              } else if (index == 2) {
-                                isPriceExpanded = !isPriceExpanded;
-                                if (isPriceExpanded) {
-                                  isDistrictExpanded = false;
-                                  isWeightExpanded = false;
                                 }
                               }
                             });
@@ -298,11 +474,6 @@ class _BuyerScreenState extends State<BuyerScreen> {
         );
       },
     );
-  }
-
-  String _formatTimestamp(Timestamp timestamp) {
-    DateTime dateTime = timestamp.toDate();
-    return DateFormat('yyyy-MM-dd').format(dateTime);
   }
 
   @override
@@ -330,382 +501,443 @@ class _BuyerScreenState extends State<BuyerScreen> {
         ),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          toolbarHeight: !showSearchBar ? 65 : 75,
+          toolbarHeight:
+              (selectedDistrict != '' || selectedWeightRange.isNotEmpty)
+                  ? showSearchBar
+                      ? 110
+                      : 100
+                  : showSearchBar
+                      ? 70
+                      : 60,
           title: GestureDetector(
             onTap: () {
               FocusScope.of(context).requestFocus(FocusNode());
             },
             child: Container(
               padding: EdgeInsets.only(top: 10),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.list,
-                            color: Colors.black,
-                            size: 35,
-                          ),
-                        )
-                      : Container(),
-                  !showSearchBar ? SizedBox(width: 10) : Container(),
-                  Expanded(
-                    child: !showSearchBar
-                        ? Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
+                  Row(
+                    children: [
+                      !showSearchBar
+                          ? IconButton(
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.list,
+                                color: Colors.black,
+                                size: 35,
+                              ),
+                            )
+                          : Container(),
+                      !showSearchBar ? SizedBox(width: 10) : Container(),
+                      Expanded(
+                        child: !showSearchBar
+                            ? Align(
+                                alignment: Alignment.centerLeft,
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      searchFocusNode.requestFocus();
+                                      showSearchBar = !showSearchBar;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.search,
+                                    color: Colors.black,
+                                    size: 27.5,
+                                  ),
+                                ),
+                              )
+                            : TextField(
+                                controller: searchText,
+                                onChanged: (text) {
+                                  searchFilter();
+                                },
+                                focusNode: searchFocusNode,
+                                decoration: InputDecoration(
+                                  fillColor: const Color.fromRGBO(0, 0, 0, 0),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: Colors.black,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.mic_outlined,
+                                    ),
+                                  ),
+                                  hintText: 'Search Crop',
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                    borderSide: BorderSide(
+                                        width: 1, color: Colors.black),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                    borderSide: BorderSide(
+                                        width: 2, color: Colors.black),
+                                  ),
+                                  filled: true,
+                                ),
+                                style: TextStyle(fontSize: 15.0),
+                              ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.filter_alt_outlined,
+                          size: 30,
+                        ),
+                        onPressed: () {
+                          _showFilterSheet(context);
+                        },
+                      ),
+                      !showSearchBar
+                          ? IconButton(
                               onPressed: () {
-                                setState(() {
-                                  searchFocusNode.requestFocus();
-
-                                  showSearchBar = !showSearchBar;
-                                });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => FavouritesScreen()),
+                                );
                               },
                               icon: Icon(
-                                Icons.search,
+                                Icons.favorite,
                                 color: Colors.black,
-                                size: 27.5,
+                                size: 30,
                               ),
-                            ),
-                          )
-                        : TextField(
-                            focusNode: searchFocusNode,
-                            decoration: InputDecoration(
-                              fillColor: const Color.fromRGBO(0, 0, 0, 0),
-                              prefixIcon: Icon(
-                                Icons.search,
+                            )
+                          : Container(),
+                      !showSearchBar
+                          ? IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ProfileScreen()),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.person,
                                 color: Colors.black,
+                                size: 30,
                               ),
-                              suffixIcon: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.mic_outlined,
-                                ),
-                              ),
-                              hintText: 'Search Crop',
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                                borderSide:
-                                    BorderSide(width: 1, color: Colors.black),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                                borderSide:
-                                    BorderSide(width: 2, color: Colors.black),
-                              ),
-                              filled: true,
-                            ),
-                            style: TextStyle(fontSize: 15.0),
-                          ),
+                            )
+                          : Container(),
+                    ],
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.filter_alt_outlined,
-                      size: 30,
+                  !showSearchBar
+                      ? Container()
+                      : SizedBox(
+                          height: 10,
+                        ),
+                  if (selectedDistrict.isNotEmpty ||
+                      selectedWeightRange.isNotEmpty)
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Wrap(
+                              spacing: 8.0,
+                              children: [
+                                if (selectedDistrict.isNotEmpty)
+                                  Chip(
+                                    label: Text(selectedDistrict),
+                                    onDeleted: () {
+                                      setState(() {
+                                        selectedDistrict = '';
+                                        Filter();
+                                      });
+                                    },
+                                  ),
+                                if (selectedWeightRange.isNotEmpty)
+                                  Chip(
+                                    label: Text(
+                                        '${selectedWeightRange.first} - ${selectedWeightRange.last} kg'),
+                                    onDeleted: () {
+                                      setState(() {
+                                        selectedWeightRange = [];
+                                        Filter();
+                                      });
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    onPressed: () {
-                      _showFilterSheet(context);
-                    },
-                  ),
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => FavouritesScreen()),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.favorite,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      : Container(),
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProfileScreen()),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.person,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      : Container(),
                 ],
               ),
             ),
           ),
         ),
-        body: StreamBuilder(
-            stream: _requireStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Something went wrong'),
-                );
-              }
-
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              if (snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Text('No requirements found'),
-                );
-              }
-
-              return ListView(
-                children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                  Map<String, dynamic> data =
-                      document.data()! as Map<String, dynamic>;
-                  Timestamp timestamp = data['requiredDate'];
-                  String formattedDate = _formatTimestamp(timestamp);
-
-                  return GestureDetector(
-                    onTap: () {
-                      searchFocusNode.unfocus();
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(top: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        color: kColor2,
-                        child: Container(
-                          height: size.height * 0.15,
-                          padding: EdgeInsets.all(15.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    child: Column(
+        body: GestureDetector(
+          onTap: () {
+            searchFocusNode.unfocus();
+          },
+          child: requireList.isEmpty && searchList.isEmpty
+              ? Center(
+                  child: Text('No crops found'),
+                )
+              : Container(
+                  padding: EdgeInsets.symmetric(horizontal: 15.0),
+                  child: ListView.builder(
+                      itemCount: unionRequireList.length,
+                      itemBuilder: (context, index) {
+                        var data = unionRequireList[index];
+                        Timestamp timestamp = data['requiredDate'];
+                        String formattedDate = _formatTimestamp(timestamp);
+                        return GestureDetector(
+                          onTap: () {
+                            searchFocusNode.unfocus();
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(top: 10),
+                            child: Card(
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              color: kColor2,
+                              child: Container(
+                                height: size.height * 0.15,
+                                padding: EdgeInsets.all(15.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                          width: size.width * 0.8,
-                                          child: Row(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                data['cropType'],
-                                                style: TextStyle(
-                                                    color: Color(0xFF222325),
-                                                    fontSize:
-                                                        size.height * 0.0175,
-                                                    fontWeight:
-                                                        FontWeight.w700),
+                                              Container(
+                                                width: size.width * 0.8,
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      data['cropType'],
+                                                      style: TextStyle(
+                                                          color:
+                                                              Color(0xFF222325),
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.0175,
+                                                          fontWeight:
+                                                              FontWeight.w700),
+                                                    ),
+                                                    Spacer(),
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.location_on,
+                                                          color: Colors.red,
+                                                          size: 15,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          data['district'],
+                                                          style: TextStyle(
+                                                              color: kColor4,
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.015,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              Spacer(),
+                                              SizedBox(height: 5),
                                               Row(
                                                 children: [
                                                   Icon(
-                                                    Icons.location_on,
-                                                    color: Colors.red,
-                                                    size: 15,
+                                                    Icons.person,
+                                                    color: Colors.black,
+                                                    size: 17.5,
                                                   ),
                                                   SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
-                                                    data['district'],
+                                                    data['buyerName'],
                                                     style: TextStyle(
-                                                        color: kColor4,
-                                                        fontSize:
-                                                            size.height * 0.015,
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.person,
-                                              color: Colors.black,
-                                              size: 17.5,
-                                            ),
-                                            SizedBox(
-                                              width: 5,
-                                            ),
-                                            Text(
-                                              data['buyerName'],
-                                              style: TextStyle(
-                                                color: Color(0xFF222325),
-                                                fontSize: size.height * 0.0175,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Container(
-                                          width: size.width * 0.8,
-                                          child: Row(
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        'Weight :',
-                                                        style: TextStyle(
-                                                            color: kColor4,
-                                                            fontSize:
-                                                                size.height *
-                                                                    0.015,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                        '${data['weight']} kg',
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize:
-                                                                size.height *
-                                                                    0.015,
-                                                            color: Color(
-                                                                0xFF222325)),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        'Required Date :',
-                                                        style: TextStyle(
-                                                            color: kColor4,
-                                                            fontSize:
-                                                                size.height *
-                                                                    0.015,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                        formattedDate,
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize:
-                                                                size.height *
-                                                                    0.015,
-                                                            color: Color(
-                                                                0xFF222325)),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                              Spacer(),
-                                              // ClipRRect(
-                                              //   borderRadius:
-                                              //       BorderRadius.circular(10),
-                                              //   child: Container(
-                                              //     padding: EdgeInsets.zero,
-                                              //     color: kColor,
-                                              //     child: IconButton(
-                                              //       onPressed: () {},
-                                              //       icon: Icon(
-                                              //         size: 17,
-                                              //         Icons.chat_bubble,
-                                              //         color: Colors.white,
-                                              //       ),
-                                              //     ),
-                                              //   ),
-                                              // ),
-                                              // Spacer(),
-                                              // SizedBox(
-                                              //   width: 10,
-                                              // ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                child: Container(
-                                                  padding: EdgeInsets.zero,
-                                                  color: kColor,
-                                                  child: IconButton(
-                                                    onPressed: () {},
-                                                    icon: Icon(
-                                                      size: 17,
-                                                      Icons.call,
-                                                      color: Colors.white,
+                                                      color: Color(0xFF222325),
+                                                      fontSize:
+                                                          size.height * 0.0175,
                                                     ),
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                               SizedBox(
-                                                width: 10,
+                                                height: 5,
                                               ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                child: Container(
-                                                  padding: EdgeInsets.zero,
-                                                  color: kColor,
-                                                  child: IconButton(
-                                                    onPressed: () {},
-                                                    icon: Icon(
-                                                      size: 17,
-                                                      Icons.favorite,
-                                                      color: Colors.white,
+                                              Container(
+                                                width: size.width * 0.8,
+                                                child: Row(
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              'Weight :',
+                                                              style: TextStyle(
+                                                                  color:
+                                                                      kColor4,
+                                                                  fontSize:
+                                                                      size.height *
+                                                                          0.015,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                            ),
+                                                            SizedBox(
+                                                              width: 5,
+                                                            ),
+                                                            Text(
+                                                              '${data['weight']} kg',
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize:
+                                                                      size.height *
+                                                                          0.015,
+                                                                  color: Color(
+                                                                      0xFF222325)),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(
+                                                          height: 5,
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              'Required Date :',
+                                                              style: TextStyle(
+                                                                  color:
+                                                                      kColor4,
+                                                                  fontSize:
+                                                                      size.height *
+                                                                          0.015,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                            ),
+                                                            SizedBox(
+                                                              width: 5,
+                                                            ),
+                                                            Text(
+                                                              formattedDate,
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize:
+                                                                      size.height *
+                                                                          0.015,
+                                                                  color: Color(
+                                                                      0xFF222325)),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ),
+                                                    Spacer(),
+                                                    // ClipRRect(
+                                                    //   borderRadius:
+                                                    //       BorderRadius.circular(10),
+                                                    //   child: Container(
+                                                    //     padding: EdgeInsets.zero,
+                                                    //     color: kColor,
+                                                    //     child: IconButton(
+                                                    //       onPressed: () {},
+                                                    //       icon: Icon(
+                                                    //         size: 17,
+                                                    //         Icons.chat_bubble,
+                                                    //         color: Colors.white,
+                                                    //       ),
+                                                    //     ),
+                                                    //   ),
+                                                    // ),
+                                                    // Spacer(),
+                                                    // SizedBox(
+                                                    //   width: 10,
+                                                    // ),
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        color: kColor,
+                                                        child: IconButton(
+                                                          onPressed: () {},
+                                                          icon: Icon(
+                                                            size: 17,
+                                                            Icons.call,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        color: kColor,
+                                                        child: IconButton(
+                                                          onPressed: () {},
+                                                          icon: Icon(
+                                                            size: 17,
+                                                            Icons.favorite,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
+                                              )
                                             ],
                                           ),
-                                        )
+                                        ),
                                       ],
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            }),
+                        );
+                      }),
+                ),
+        ),
       ),
     );
   }
