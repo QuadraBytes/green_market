@@ -17,20 +17,12 @@ class BottomBarScreen extends StatefulWidget {
 class _BottomBarScreenState extends State<BottomBarScreen> {
   int _currentIndex = 0;
   final PageController _page = PageController();
-  // bool _isStudentMode = false;
 
   final List<Widget> _screens = [
     FarmerScreen(),
     BuyerScreen(),
     CommunityScreen(),
   ];
-
-  // Future<void> _loadModeState() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _isStudentMode = prefs.getBool('isStudentMode') ?? false;
-  //   });
-  // }
 
   void onTabTapped(int index) {
     setState(() {
@@ -39,14 +31,9 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     });
   }
 
-  // void onModeChanged(bool isStudentMode) {
-  //   _loadModeState();
-  // }
-
   @override
   void initState() {
     super.initState();
-    // _loadModeState();
   }
 
   @override
@@ -62,12 +49,6 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
               _currentIndex = value;
             });
           },
-          // children: _screens.map((screen) {
-          //   if (screen is UserProfileScreen) {
-          //     return UserProfileScreen(onModeChanged: onModeChanged);
-          //   }
-          //   return screen;
-          // }).toList(),
           children: _screens,
         ),
         bottomNavigationBar: ClipRRect(
