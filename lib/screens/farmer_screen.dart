@@ -55,20 +55,39 @@ class _FarmerScreenState extends State<FarmerScreen> {
     var list = await FirebaseFirestore.instance.collection('crops').get();
     setState(() {
       cropList = list.docs;
-      searchList = cropList;
+      // searchList = cropList;
       unionCropList = cropList;
     });
   }
 
   updateUnionList() {
-    unionCropList =
-        searchList.toSet().intersection(filterList.toSet()).toList();
-    setState(() {});
+    setState(() {
+      if (searchText.text.isEmpty &&
+          selectedDistrict.isEmpty &&
+          selectedPriceRange.isEmpty &&
+          selectedWeightRange.isEmpty) {
+        unionCropList = cropList;
+      } else if (searchText.text.isNotEmpty && selectedDistrict.isNotEmpty ||
+          selectedPriceRange.isNotEmpty ||
+          selectedWeightRange.isNotEmpty) {
+        unionCropList =
+            searchList.toSet().intersection(filterList.toSet()).toList();
+      } else if (searchText.text.isEmpty && selectedDistrict.isNotEmpty ||
+          selectedPriceRange.isNotEmpty ||
+          selectedWeightRange.isNotEmpty) {
+        unionCropList = filterList;
+      } else if (searchText.text.isNotEmpty &&
+          selectedDistrict.isEmpty &&
+          selectedPriceRange.isEmpty &&
+          selectedWeightRange.isEmpty) {
+        unionCropList = searchList;
+      }
+    });
   }
 
-  searchFilter() {
-    if (searchText.text.isNotEmpty) {
-      String searchLower = searchText.text.toLowerCase();
+  searchFilter(String text) {
+    if (text.isNotEmpty) {
+      String searchLower = text.toLowerCase();
       List list = [];
       for (var crop in cropList) {
         if (crop['cropType'].toString().toLowerCase().contains(searchLower) ||
@@ -80,6 +99,10 @@ class _FarmerScreenState extends State<FarmerScreen> {
       }
       setState(() {
         searchList = list;
+      });
+    } else {
+      setState(() {
+        searchList = [];
       });
     }
     updateUnionList();
@@ -943,7 +966,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
                           : TextField(
                               controller: searchText,
                               onChanged: (text) {
-                                searchFilter();
+                                searchFilter(searchText.text.toString());
                               },
                               focusNode: searchFocusNode,
                               decoration: InputDecoration(
@@ -975,12 +998,15 @@ class _FarmerScreenState extends State<FarmerScreen> {
                             ),
                     ),
                     IconButton(
+                      focusNode: searchFocusNode,
                       icon: Icon(
                         Icons.filter_alt_outlined,
                         size: 30,
                       ),
                       onPressed: () {
+                        showSearchBar = true;
                         _showFilterSheet(context);
+                        searchFocusNode.requestFocus();
                       },
                     ),
                     !showSearchBar

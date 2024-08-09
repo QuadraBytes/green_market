@@ -61,9 +61,24 @@ class _BuyerScreenState extends State<BuyerScreen> {
   }
 
   updateUnionList() {
-    unionRequireList =
-        searchList.toSet().intersection(filterList.toSet()).toList();
-    setState(() {});
+    setState(() {
+      if (searchText.text.isEmpty &&
+          selectedDistrict.isEmpty &&
+          selectedWeightRange.isEmpty) {
+        unionRequireList = requireList;
+      } else if (searchText.text.isNotEmpty && selectedDistrict.isNotEmpty ||
+          selectedWeightRange.isNotEmpty) {
+        unionRequireList =
+            searchList.toSet().intersection(filterList.toSet()).toList();
+      } else if (searchText.text.isEmpty && selectedDistrict.isNotEmpty ||
+          selectedWeightRange.isNotEmpty) {
+        unionRequireList = filterList;
+      } else if (searchText.text.isNotEmpty &&
+          selectedDistrict.isEmpty &&
+          selectedWeightRange.isEmpty) {
+        unionRequireList = searchList;
+      }
+    });
   }
 
   searchFilter() {
@@ -81,6 +96,8 @@ class _BuyerScreenState extends State<BuyerScreen> {
       setState(() {
         searchList = list;
       });
+    } else {
+      searchList = [];
     }
     updateUnionList();
   }

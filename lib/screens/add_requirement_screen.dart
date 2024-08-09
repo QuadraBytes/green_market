@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+late User? loggedInUser;
 
 class AddRequirementScreen extends StatefulWidget {
   const AddRequirementScreen({super.key});
@@ -19,9 +22,22 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
   String? _cropType;
   String? _weight;
   DateTime? _requiredDate;
+  final _auth = FirebaseAuth.instance;
 
   final CollectionReference requirements =
       FirebaseFirestore.instance.collection('requirements');
+
+  Future<void> getUserData() async {
+    loggedInUser = await _auth.currentUser!;
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(loggedInUser?.email)
+        .get();
+
+    setState(() {
+      _buyerName = userSnapshot['displayName'].toString();
+    });
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -40,9 +56,8 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
-      if (_buyerName == null ||
-          _district == null ||
+
+      if (_district == null ||
           _address == null ||
           _phoneNumber == null ||
           _requiredDate == null ||
@@ -56,6 +71,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
 
       try {
         await requirements.add({
+          'userId': loggedInUser!.uid,
           'buyerName': _buyerName,
           'district': _district,
           'address': _address,
@@ -64,7 +80,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
           'weight': _weight,
           'requiredDate': _requiredDate,
         });
-       
+
         Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -75,6 +91,12 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
         );
       }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
   }
 
   @override
@@ -103,20 +125,20 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                     SizedBox(
                       height: 50,
                     ),
-                    TextFormField(
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(labelText: "Buyer's Name"),
-                      // validator: (value) {
-                      //   if (value == null || value.isEmpty) {
-                      //     return "Please enter buyer's name";
-                      //   }
-                      //   return null;
-                      // },
-                      onSaved: (value) {
-                        _buyerName = value;
-                      },
-                    ),
-                    SizedBox(height: 15),
+                    // TextFormField(
+                    //   style: TextStyle(fontWeight: FontWeight.w500),
+                    //   decoration: InputDecoration(labelText: "Buyer's Name"),
+                    //   // validator: (value) {
+                    //   //   if (value == null || value.isEmpty) {
+                    //   //     return "Please enter buyer's name";
+                    //   //   }
+                    //   //   return null;
+                    //   // },
+                    //   onSaved: (value) {
+                    //     _buyerName = value;
+                    //   },
+                    // ),
+                    // SizedBox(height: 15),
                     DropdownButtonFormField<String>(
                       menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
                       decoration: InputDecoration(
