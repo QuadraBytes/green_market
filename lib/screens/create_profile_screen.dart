@@ -78,8 +78,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         'email': loggedInUser!.email,
       });
 
-
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -106,11 +104,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-              // Container(
-              //   height: MediaQuery.of(context).size.height * 0.4,
-              //   width: MediaQuery.of(context).size.width * 0.5,
-              //   child: Image.asset("assets/images/Background.png"),
-              // ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+                width: MediaQuery.of(context).size.width * 0.4,
+                child: Image.asset("assets/images/logo.png"),
+              ),
               //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
               const Text(
                 "CREATE PROFILE",
@@ -199,22 +197,25 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         ),
                       ),
                       SizedBox(height: 20),
-                       showLoading ?
-                      CircularProgressIndicator(color: kColor,) : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kColor,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: createProfile,
-                         child: Text("Create Profile",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                      ),
+                      showLoading
+                          ? CircularProgressIndicator(
+                              color: kColor,
+                            )
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kColor,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 50, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: createProfile,
+                              child: Text("Create Profile",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                            ),
                     ],
                   ),
                 ),
