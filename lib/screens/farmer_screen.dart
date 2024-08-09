@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
@@ -6,6 +7,8 @@ import 'package:green_market/screens/add_crop_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
 import 'package:intl/intl.dart';
+
+late User? loggedInUser;
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -31,10 +34,40 @@ class _FarmerScreenState extends State<FarmerScreen> {
   late List searchList = [];
   late List filterList = [];
   late List unionCropList = [];
+  List<String> cropFavourites = [];
+
+  final _auth = FirebaseAuth.instance;
+  bool showLoading = false;
+
+  void getCurrentUser() async {
+    final user = await _auth.currentUser;
+    if (user != null) {
+      loggedInUser = user;
+      await getUserFavourites();
+    }
+  }
+
+  Future<void> getUserFavourites() async {
+    try {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(loggedInUser!.email)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          cropFavourites = List<String>.from(userDoc['cropFavourites'] ?? []);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    getCurrentUser();
     getAllCrops();
     searchFocusNode.addListener(() {
       if (!searchFocusNode.hasFocus) {
@@ -58,6 +91,44 @@ class _FarmerScreenState extends State<FarmerScreen> {
       // searchList = cropList;
       unionCropList = cropList;
     });
+  }
+
+  addFavourites(String cropId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(loggedInUser!.email)
+          .update({
+        'cropFavourites': FieldValue.arrayUnion([cropId]),
+      });
+
+      setState(() {
+        cropFavourites.add(cropId);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  removeFavourites(String cropId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(loggedInUser!.email)
+          .update({
+        'cropFavourites': FieldValue.arrayRemove([cropId]),
+      });
+
+      setState(() {
+        cropFavourites.remove(cropId);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  bool isFavourite(String cropId) {
+    return cropFavourites.contains(cropId);
   }
 
   updateUnionList() {
@@ -161,7 +232,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
     return DateFormat('yyyy-MM-dd').format(dateTime);
   }
 
-  void _showCropDetails(var data) {
+  void _showCropDetails(var data, bool isFavourite) {
     Timestamp availableDateTimestamp = data['availableDate'];
     Timestamp expireDateTimestamp = data['expiringDate'];
 
@@ -367,14 +438,18 @@ class _FarmerScreenState extends State<FarmerScreen> {
                             SizedBox(
                               width: 20,
                             ),
-                            FloatingActionButton(
-                              onPressed: () {},
-                              child: Icon(
-                                Icons.favorite,
-                                color: Colors.white,
-                              ),
-                              backgroundColor: kColor,
-                            ),
+                            isFavourite
+                                ? Container()
+                                : FloatingActionButton(
+                                    onPressed: () {
+                                      addFavourites(data.id);
+                                    },
+                                    child: Icon(
+                                      Icons.favorite,
+                                      color: Colors.white,
+                                    ),
+                                    backgroundColor: kColor,
+                                  ),
                             SizedBox(
                               width: 10,
                             )
@@ -1106,278 +1181,307 @@ class _FarmerScreenState extends State<FarmerScreen> {
           onTap: () {
             searchFocusNode.unfocus();
           },
-          child: cropList.isEmpty && searchList.isEmpty
+          child: cropList.isEmpty
               ? Center(
-                  child: Text('No crops found'),
-                )
-              : Container(
-                  padding: EdgeInsets.symmetric(horizontal: 15.0),
-                  child: ListView.builder(
-                      itemCount: unionCropList.length,
-                      itemBuilder: (context, index) {
-                        var data = unionCropList[index];
-                        return GestureDetector(
-                          onTap: () {
-                            _showCropDetails(data);
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(top: 10),
-                            child: Card(
-                              elevation: 5,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              color: kColor2,
+                  child: CircularProgressIndicator(
+                  color: kColor,
+                ))
+              : unionCropList.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No Crops Available',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15.0),
+                      child: ListView.builder(
+                          itemCount: unionCropList.length,
+                          itemBuilder: (context, index) {
+                            var data = unionCropList[index];
+                            bool isFavouriteCrop = isFavourite(data.id);
+
+                            return GestureDetector(
+                              onTap: () {
+                                _showCropDetails(data, isFavouriteCrop);
+                              },
                               child: Container(
-                                height: size.height * 0.20,
-                                padding: EdgeInsets.all(15.0),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                margin: EdgeInsets.only(top: 10),
+                                child: Card(
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  color: kColor2,
+                                  child: Container(
+                                    height: size.height * 0.20,
+                                    padding: EdgeInsets.all(15.0),
+                                    child: Column(
                                       children: [
-                                        Column(
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Image(
-                                                width: size.width * 0.3,
-                                                height: size.height * 0.125,
-                                                fit: BoxFit.cover,
-                                                image: AssetImage(
-                                                    "assets/images/crop.jpg"),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              data['cropType'],
-                                              style: TextStyle(
-                                                  color: Color(0xFF222325),
-                                                  fontSize:
-                                                      size.height * 0.0175,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                          ],
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 20),
-                                          child: Container(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                            Column(
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.person,
-                                                      color: Colors.black,
-                                                      size: 17.5,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      data['farmerName'],
-                                                      style: TextStyle(
-                                                        color:
-                                                            Color(0xFF222325),
-                                                        fontSize: size.height *
-                                                            0.0175,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(
-                                                  height: 3,
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.location_on,
-                                                      color: Colors.red,
-                                                      size: 15,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      data['district'],
-                                                      style: TextStyle(
-                                                          color: kColor4,
-                                                          fontSize:
-                                                              size.height *
-                                                                  0.015,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(
-                                                  height: 3,
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      'Weight :',
-                                                      style: TextStyle(
-                                                          color: kColor4,
-                                                          fontSize:
-                                                              size.height *
-                                                                  0.015,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      '${data['weight']} kg',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontSize:
-                                                              size.height *
-                                                                  0.015,
-                                                          color: Color(
-                                                              0xFF222325)),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(
-                                                  height: 3,
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      'Price :',
-                                                      style: TextStyle(
-                                                          color: kColor4,
-                                                          fontSize:
-                                                              size.height *
-                                                                  0.015,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      'Rs. ${data['price']}',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontSize:
-                                                              size.height *
-                                                                  0.015,
-                                                          color: Color(
-                                                              0xFF222325)),
-                                                    ),
-                                                  ],
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: Image(
+                                                    width: size.width * 0.3,
+                                                    height: size.height * 0.125,
+                                                    fit: BoxFit.cover,
+                                                    image: AssetImage(
+                                                        "assets/images/crop.jpg"),
+                                                  ),
                                                 ),
                                                 SizedBox(
                                                   height: 10,
                                                 ),
-                                                Row(
-                                                  children: [
-                                                    Container(
-                                                      child: Row(
-                                                        children: [
-                                                          // ClipRRect(
-                                                          //   borderRadius:
-                                                          //       BorderRadius
-                                                          //           .circular(10),
-                                                          //   child: Container(
-                                                          //     padding:
-                                                          //         EdgeInsets.zero,
-                                                          //     color: kColor,
-                                                          //     child: IconButton(
-                                                          //       onPressed: () {},
-                                                          //       icon: Icon(
-                                                          //         size: 17,
-                                                          //         Icons
-                                                          //             .chat_bubble,
-                                                          //         color: Colors
-                                                          //             .white,
-                                                          //       ),
-                                                          //     ),
-                                                          //   ),
-                                                          // ),
-                                                          // SizedBox(
-                                                          //   width: 10,
-                                                          // ),
-                                                          ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10),
-                                                            child: Container(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .zero,
-                                                              color: kColor,
-                                                              child: IconButton(
-                                                                onPressed:
-                                                                    () {},
-                                                                icon: Icon(
-                                                                  size: 17,
-                                                                  Icons.call,
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            width: 10,
-                                                          ),
-                                                          ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10),
-                                                            child: Container(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .zero,
-                                                              color: kColor,
-                                                              child: IconButton(
-                                                                onPressed:
-                                                                    () {},
-                                                                icon: Icon(
-                                                                  size: 17,
-                                                                  Icons
-                                                                      .favorite,
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                )
+                                                Text(
+                                                  data['cropType'],
+                                                  style: TextStyle(
+                                                      color: Color(0xFF222325),
+                                                      fontSize:
+                                                          size.height * 0.0175,
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
                                               ],
                                             ),
-                                          ),
+                                            Padding(
+                                              padding:
+                                                  EdgeInsets.only(left: 20),
+                                              child: Container(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.person,
+                                                          color: Colors.black,
+                                                          size: 17.5,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          data['farmerName'],
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xFF222325),
+                                                            fontSize:
+                                                                size.height *
+                                                                    0.0175,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                      height: 3,
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.location_on,
+                                                          color: Colors.red,
+                                                          size: 15,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          data['district'],
+                                                          style: TextStyle(
+                                                              color: kColor4,
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.015,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                      height: 3,
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Weight :',
+                                                          style: TextStyle(
+                                                              color: kColor4,
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.015,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          '${data['weight']} kg',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.015,
+                                                              color: Color(
+                                                                  0xFF222325)),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                      height: 3,
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Price :',
+                                                          style: TextStyle(
+                                                              color: kColor4,
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.015,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          'Rs. ${data['price']}',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.015,
+                                                              color: Color(
+                                                                  0xFF222325)),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          child: Row(
+                                                            children: [
+                                                              // ClipRRect(
+                                                              //   borderRadius:
+                                                              //       BorderRadius
+                                                              //           .circular(10),
+                                                              //   child: Container(
+                                                              //     padding:
+                                                              //         EdgeInsets.zero,
+                                                              //     color: kColor,
+                                                              //     child: IconButton(
+                                                              //       onPressed: () {},
+                                                              //       icon: Icon(
+                                                              //         size: 17,
+                                                              //         Icons
+                                                              //             .chat_bubble,
+                                                              //         color: Colors
+                                                              //             .white,
+                                                              //       ),
+                                                              //     ),
+                                                              //   ),
+                                                              // ),
+                                                              // SizedBox(
+                                                              //   width: 10,
+                                                              // ),
+                                                              ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                                child:
+                                                                    Container(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                  color: kColor,
+                                                                  child:
+                                                                      IconButton(
+                                                                    onPressed:
+                                                                        () {},
+                                                                    icon: Icon(
+                                                                      size: 17,
+                                                                      Icons
+                                                                          .call,
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 10,
+                                                              ),
+                                                              isFavouriteCrop
+                                                                  ? Container()
+                                                                  : ClipRRect(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              10),
+                                                                      child:
+                                                                          Container(
+                                                                        padding:
+                                                                            EdgeInsets.zero,
+                                                                        color:
+                                                                            kColor,
+                                                                        child:
+                                                                            IconButton(
+                                                                          onPressed:
+                                                                              () {
+                                                                            addFavourites(data.id);
+                                                                          },
+                                                                          icon:
+                                                                              Icon(
+                                                                            size:
+                                                                                17,
+                                                                            Icons.favorite,
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      }),
-                ),
+                            );
+                          }),
+                    ),
         ),
       ),
     );
