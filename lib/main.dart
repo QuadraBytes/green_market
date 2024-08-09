@@ -1,17 +1,28 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:email_otp/email_otp.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/screens/availability_screen.dart';
+import 'package:green_market/screens/create_profile_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
+import 'package:green_market/screens/forget_password.dart';
 import 'package:green_market/screens/profile_screen.dart';
 import 'package:green_market/screens/splash_screen.dart';
 import 'package:green_market/screens/login_screen.dart';
 import 'package:green_market/screens/signin_screen.dart';
 
 void main() async {
+  EmailOTP.config(
+    appName: 'GreenMarket',
+    expiry: 1000 * 60 * 2,
+    otpLength: 6,
+    otpType: OTPType.numeric,
+    emailTheme: EmailTheme.v4,
+  );
+
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(

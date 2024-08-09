@@ -1,9 +1,16 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
+import 'package:green_market/screens/login_screen.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+
+late User? loggedInUser;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,7 +20,13 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _auth = FirebaseAuth.instance;
+  String? displayName;
+  String? about;
+  String? phoneNumber;
+  String? district;
   List<String> crops = ["vrevw", 'rvrev', 'ewqdew'];
+
   // bool isBuyerMode = false;
 
   // Future<void> loadModeState() async {
@@ -28,8 +41,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   //   await prefs.setBool('isBuyerMode', isBuyerMode);
   // }
 
+  Future<void> getUserData() async {
+    loggedInUser = _auth.currentUser!;
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(loggedInUser?.email)
+        .get();
+
+    setState(() {
+      displayName = userSnapshot['displayName'].toString();
+      about = userSnapshot['about'].toString();
+      phoneNumber = userSnapshot['phoneNumber'].toString();
+      district = userSnapshot['district'].toString();
+    });
+  }
+
+  void logout() async {
+    await _auth.signOut();
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => Login()));
+  }
+
   @override
   void initState() {
+    getUserData();
     super.initState();
   }
 
@@ -80,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Saman Bandara',
+                    displayName ?? 'Name',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -95,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         width: 5,
                       ),
                       Text(
-                        'Digana, Kandy',
+                        district ?? 'District',
                         style: TextStyle(
                           fontSize: 16,
                           color: kColor3,
@@ -112,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         width: 5,
                       ),
                       Text(
-                        '+94 XX XXX XXXX',
+                        phoneNumber ?? 'Phone Number',
                         style: TextStyle(
                           fontSize: 16,
                           color: kColor3,
@@ -120,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 30),
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.center,
                   //   children: [
@@ -156,10 +191,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //     ),
                   //   ],
                   // ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Text(
+                        'About',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 17.5),
+                      ),
+                    ),
+                  ), 
+                  SizedBox(
+                    height: 20,
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', // Replace with actual description
+                      about ??
+                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', // Replace with actual description
                       textAlign: TextAlign.justify,
 
                       style: TextStyle(
@@ -169,7 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 30,
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -227,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 10,
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: logout,
                     child: Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 20, vertical: 5),
