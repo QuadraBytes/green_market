@@ -40,9 +40,9 @@ class _LoginState extends State<Login> {
         );
         return;
       }
-    setState(() {
-      showLoading = true;
-    });
+      setState(() {
+        showLoading = true;
+      });
 
       await _auth.signInWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);
@@ -58,6 +58,9 @@ class _LoginState extends State<Login> {
           backgroundColor: Colors.red,
         ),
       );
+      setState(() {
+        showLoading = false;
+      });
     }
   }
 
@@ -118,23 +121,25 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      showLoading ?
-                      CircularProgressIndicator(color: kColor,) :
-                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kColor,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: signIn,
-                        child: Text("Login",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                      ),
+                      showLoading
+                          ? CircularProgressIndicator(
+                              color: kColor,
+                            )
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kColor,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 50, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: signIn,
+                              child: Text("Login",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                            ),
                       SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
