@@ -1,10 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_crop_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -14,17 +15,27 @@ class FarmerScreen extends StatefulWidget {
 }
 
 class _FarmerScreenState extends State<FarmerScreen> {
+  TextEditingController searchText = TextEditingController();
+  String selectedDistrict = '';
+  List<String> selectedWeightRange = [];
+  List<String> selectedPriceRange = [];
+  bool isAvailableSelected = false;
+  bool isUpcomingSelected = false;
+
   bool showSearchBar = false;
   bool isDistrictExpanded = false;
   bool isWeightExpanded = false;
   bool isPriceExpanded = false;
-  bool isAvailableSelected = false;
-  bool isUpcomingSelected = false;
   FocusNode searchFocusNode = FocusNode();
+  late List cropList = [];
+  late List searchList = [];
+  late List filterList = [];
+  late List unionCropList = [];
 
   @override
   void initState() {
     super.initState();
+    getAllCrops();
     searchFocusNode.addListener(() {
       if (!searchFocusNode.hasFocus) {
         setState(() {
@@ -40,13 +51,107 @@ class _FarmerScreenState extends State<FarmerScreen> {
     super.dispose();
   }
 
-  void _showCropDetails() {
+  getAllCrops() async {
+    var list = await FirebaseFirestore.instance.collection('crops').get();
+    setState(() {
+      cropList = list.docs;
+      searchList = cropList;
+      unionCropList = cropList;
+    });
+  }
+
+  updateUnionList() {
+    unionCropList =
+        searchList.toSet().intersection(filterList.toSet()).toList();
+    setState(() {});
+  }
+
+  searchFilter() {
+    if (searchText.text.isNotEmpty) {
+      String searchLower = searchText.text.toLowerCase();
+      List list = [];
+      for (var crop in cropList) {
+        if (crop['cropType'].toString().toLowerCase().contains(searchLower) ||
+            crop['farmerName'].toString().toLowerCase().contains(searchLower) ||
+            searchLower.contains(crop['cropType'].toString().toLowerCase()) ||
+            searchLower.contains(crop['farmerName'].toString().toLowerCase())) {
+          list.add(crop);
+        }
+      }
+      setState(() {
+        searchList = list;
+      });
+    }
+    updateUnionList();
+  }
+
+  Filter() {
+    List list = [];
+    for (var crop in cropList) {
+      bool isInclude = true;
+
+      if (selectedWeightRange.isNotEmpty) {
+        int cropWeight = int.parse(crop['weight']);
+        if (cropWeight < int.parse(selectedWeightRange[0]) ||
+            cropWeight > int.parse(selectedWeightRange[1])) {
+          isInclude = false;
+        }
+      }
+      if (selectedPriceRange.isNotEmpty) {
+        int cropPrice = int.parse(crop['price']);
+        if (cropPrice < int.parse(selectedPriceRange[0]) ||
+            cropPrice > int.parse(selectedPriceRange[1])) {
+          isInclude = false;
+        }
+      }
+      if (selectedDistrict.isNotEmpty && crop['district'] != selectedDistrict) {
+        isInclude = false;
+      }
+
+      Timestamp availableDateTimestamp = crop['availableDate'];
+      DateTime availableDate = availableDateTimestamp.toDate();
+      Timestamp expireDateTimestamp = crop['expiringDate'];
+      DateTime expireDate = expireDateTimestamp.toDate();
+
+      if (isAvailableSelected) {
+        if (availableDate.isAfter(DateTime.now())) {
+          isInclude = false;
+        }
+      }
+      if (isUpcomingSelected) {
+        if (availableDate.isBefore(DateTime.now())) {
+          isInclude = false;
+        }
+      }
+      if (isInclude) {
+        list.add(crop);
+      }
+    }
+    setState(() {
+      filterList = list;
+    });
+    updateUnionList();
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    return DateFormat('yyyy-MM-dd').format(dateTime);
+  }
+
+  void _showCropDetails(var data) {
+    Timestamp availableDateTimestamp = data['availableDate'];
+    Timestamp expireDateTimestamp = data['expiringDate'];
+
+    String availableDate = _formatTimestamp(availableDateTimestamp);
+    String expireDate = _formatTimestamp(expireDateTimestamp);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
+        final size = MediaQuery.of(context).size;
         return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: size.height * 0.7,
           child: Stack(children: [
             Column(
               children: [
@@ -70,55 +175,187 @@ class _FarmerScreenState extends State<FarmerScreen> {
                       Align(
                         alignment: Alignment.topCenter,
                         child: Text(
-                          'Crop Name',
+                          data['cropType'],
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: size.height * 0.025,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Farmer Name',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF222325),
+                      SizedBox(height: 20),
+                      Container(
+                        width: size.width * 0.9,
+                        child: Row(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.person,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  data['farmerName'],
+                                  style: TextStyle(
+                                    color: Color(0xFF222325),
+                                    fontSize: size.height * 0.02,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                  size: 17.5,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  data['district'],
+                                  style: TextStyle(
+                                      color: kColor4,
+                                      fontSize: size.height * 0.0175,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        'District',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF072471),
-                        ),
+                      SizedBox(
+                        height: 10,
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Weight',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF222325),
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'Weight :',
+                            style: TextStyle(
+                                color: kColor4,
+                                fontSize: size.height * 0.0175,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            '${data['weight']} kg',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: size.height * 0.0175,
+                                color: Color(0xFF222325)),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Price',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF222325),
-                        ),
+                      SizedBox(
+                        height: 10,
                       ),
-                      // SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Text(
+                            'Price :',
+                            style: TextStyle(
+                                color: kColor4,
+                                fontSize: size.height * 0.0175,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            'Rs. ${data['price']}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: size.height * 0.0175,
+                                color: Color(0xFF222325)),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Available Date :',
+                            style: TextStyle(
+                                color: kColor4,
+                                fontSize: size.height * 0.0175,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            availableDate,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: size.height * 0.0175,
+                                color: Color(0xFF222325)),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Expired Date :',
+                            style: TextStyle(
+                                color: kColor4,
+                                fontSize: size.height * 0.0175,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            expireDate,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: size.height * 0.0175,
+                                color: Color(0xFF222325)),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
                       Align(
                         alignment: Alignment.bottomRight,
-                        child: FloatingActionButton(
-                          onPressed: () {},
-                          child: Icon(
-                            Icons.call,
-                            color: Colors.white,
-                          ),
-                          backgroundColor: kColor,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                              onPressed: () {},
+                              child: Icon(
+                                Icons.call,
+                                color: Colors.white,
+                              ),
+                              backgroundColor: kColor,
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            FloatingActionButton(
+                              onPressed: () {},
+                              child: Icon(
+                                Icons.favorite,
+                                color: Colors.white,
+                              ),
+                              backgroundColor: kColor,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            )
+                          ],
                         ),
                       ),
                     ],
@@ -188,6 +425,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                     } else {
                                       isAvailableSelected = true;
                                     }
+                                    Filter();
                                   });
                                 },
                                 child: Container(
@@ -229,6 +467,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                   } else {
                                     isUpcomingSelected = true;
                                   }
+                                  Filter();
                                 });
                               },
                               child: Container(
@@ -287,8 +526,34 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                   Column(
                                     children: districts
                                         .map((district) => ListTile(
-                                              title: Text(district),
-                                              onTap: () {},
+                                              title: selectedDistrict ==
+                                                      district
+                                                  ? Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.check,
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              255, 0, 110, 57),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(district)
+                                                      ],
+                                                    )
+                                                  : Text(district),
+                                              onTap: () {
+                                                if (selectedDistrict ==
+                                                    district) {
+                                                  selectedDistrict = '';
+                                                } else {
+                                                  selectedDistrict = district;
+                                                }
+                                                Navigator.pop(context);
+                                                _showFilterSheet(context);
+                                                Filter();
+                                              },
                                             ))
                                         .toList(),
                                   ),
@@ -318,12 +583,113 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                 children: List.generate(
                                   weightRange.length,
                                   (index) => ListTile(
-                                    title: Text(index == 0
-                                        ? 'Below ${weightRange[index]} kg'
+                                    title: index == 0
+                                        ? selectedWeightRange.contains('0') &&
+                                                selectedWeightRange.contains(
+                                                    weightRange[index])
+                                            ? Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.check,
+                                                    color: const Color.fromARGB(
+                                                        255, 0, 110, 57),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                      'Below ${weightRange[index]} kg'),
+                                                ],
+                                              )
+                                            : Text(
+                                                'Below ${weightRange[index]} kg')
                                         : index == weightRange.length - 1
-                                            ? 'Above ${weightRange[index]} kg'
-                                            : '${weightRange[index]} - ${weightRange[index + 1]} kg'),
-                                    onTap: () {},
+                                            ? selectedWeightRange.contains(
+                                                        weightRange[index]) &&
+                                                    selectedWeightRange
+                                                        .contains('1000')
+                                                ? Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 0, 110, 57),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                          'Above ${weightRange[index]} kg'),
+                                                    ],
+                                                  )
+                                                : Text(
+                                                    'Above ${weightRange[index]} kg')
+                                            : selectedWeightRange.contains(
+                                                        weightRange[index]) &&
+                                                    selectedWeightRange
+                                                        .contains(weightRange[
+                                                            index + 1])
+                                                ? Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 0, 110, 57),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                          '${weightRange[index]} - ${weightRange[index + 1]} kg'),
+                                                    ],
+                                                  )
+                                                : Text(
+                                                    '${weightRange[index]} - ${weightRange[index + 1]} kg'),
+                                    onTap: () {
+                                      if (index == 0) {
+                                        if (selectedWeightRange.contains('0') &&
+                                            selectedWeightRange
+                                                .contains(weightRange[index])) {
+                                          selectedWeightRange = [];
+                                        } else {
+                                          selectedWeightRange = [
+                                            '0',
+                                            weightRange[index]
+                                          ];
+                                        }
+                                      } else if (index ==
+                                          weightRange.length - 1) {
+                                        if (selectedWeightRange
+                                                .contains(weightRange[index]) &&
+                                            selectedWeightRange
+                                                .contains('1000')) {
+                                          selectedWeightRange = [];
+                                        } else {
+                                          selectedWeightRange = [
+                                            weightRange[index],
+                                            '1000'
+                                          ];
+                                        }
+                                      } else {
+                                        if (selectedWeightRange
+                                                .contains(weightRange[index]) &&
+                                            selectedWeightRange.contains(
+                                                weightRange[index + 1])) {
+                                          selectedWeightRange = [];
+                                        } else {
+                                          selectedWeightRange = [
+                                            weightRange[index],
+                                            weightRange[index + 1]
+                                          ];
+                                        }
+                                      }
+                                      print(selectedWeightRange);
+                                      Navigator.pop(context);
+                                      _showFilterSheet(context);
+                                      Filter();
+                                    },
                                   ),
                                 ),
                               ),
@@ -334,25 +700,129 @@ class _FarmerScreenState extends State<FarmerScreen> {
                               backgroundColor: Colors.transparent,
                               headerBuilder:
                                   (BuildContext context, bool isExpanded) {
-                                return ListTile(
-                                  title: Text(
-                                    'Price',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w600),
-                                  ),
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      title: Text(
+                                        'Price',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
+                                  ],
                                 );
                               },
                               body: Column(
                                 children: List.generate(
                                   priceRange.length,
                                   (index) => ListTile(
-                                    title: Text(index == 0
-                                        ? 'Below Rs.${priceRange[index]}'
+                                    title: index == 0
+                                        ? selectedPriceRange.contains('0') &&
+                                                selectedPriceRange
+                                                    .contains(priceRange[index])
+                                            ? Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.check,
+                                                    color: const Color.fromARGB(
+                                                        255, 0, 110, 57),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                      'Below Rs.${priceRange[index]}'),
+                                                ],
+                                              )
+                                            : Text(
+                                                'Below Rs.${priceRange[index]}')
                                         : index == priceRange.length - 1
-                                            ? 'Above Rs.${priceRange[index]}'
-                                            : 'Rs.${priceRange[index]} - ${priceRange[index + 1]}'),
-                                    onTap: () {},
+                                            ? selectedPriceRange.contains(
+                                                        priceRange[index]) &&
+                                                    selectedPriceRange
+                                                        .contains('1000000')
+                                                ? Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 0, 110, 57),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                          'Above Rs.${priceRange[index]}'),
+                                                    ],
+                                                  )
+                                                : Text(
+                                                    'Above Rs.${priceRange[index]}')
+                                            : selectedPriceRange.contains(
+                                                        priceRange[index]) &&
+                                                    selectedPriceRange.contains(
+                                                        priceRange[index + 1])
+                                                ? Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 0, 110, 57),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                          'Rs.${priceRange[index]} - ${priceRange[index + 1]}'),
+                                                    ],
+                                                  )
+                                                : Text(
+                                                    'Rs.${priceRange[index]} - ${priceRange[index + 1]}'),
+                                    onTap: () {
+                                      if (index == 0) {
+                                        if (selectedPriceRange.contains('0') &&
+                                            selectedPriceRange
+                                                .contains(priceRange[index])) {
+                                          selectedPriceRange = [];
+                                        } else {
+                                          selectedPriceRange = [
+                                            '0',
+                                            priceRange[index]
+                                          ];
+                                        }
+                                      } else if (index ==
+                                          priceRange.length - 1) {
+                                        if (selectedPriceRange
+                                                .contains(priceRange[index]) &&
+                                            selectedPriceRange
+                                                .contains('1000000')) {
+                                          selectedPriceRange = [];
+                                        } else {
+                                          selectedPriceRange = [
+                                            priceRange[index],
+                                            '1000000'
+                                          ];
+                                        }
+                                      } else {
+                                        if (selectedPriceRange
+                                                .contains(priceRange[index]) &&
+                                            selectedPriceRange.contains(
+                                                priceRange[index + 1])) {
+                                          selectedPriceRange = [];
+                                        } else {
+                                          selectedPriceRange = [
+                                            priceRange[index],
+                                            priceRange[index + 1]
+                                          ];
+                                        }
+                                      }
+                                      print(selectedPriceRange);
+                                      Navigator.pop(context);
+                                      _showFilterSheet(context);
+                                      Filter();
+                                    },
                                   ),
                                 ),
                               ),
@@ -402,140 +872,207 @@ class _FarmerScreenState extends State<FarmerScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    var height = size.height * 0.15;
 
     return SafeArea(
       child: Scaffold(
-        floatingActionButton:  ClipRRect(
-                borderRadius: BorderRadius.circular(50),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AddCropScreen()),
-                    );
-                  },
-                  child: Icon(
-                    Icons.add,
-                    size: 35,
-                    color: Colors.white,
-                  ),
-                  backgroundColor: kColor,
-                ),
-              ),
+        floatingActionButton: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddCropScreen()),
+              );
+            },
+            child: Icon(
+              Icons.add,
+              size: 35,
+              color: Colors.white,
+            ),
+            backgroundColor: kColor,
+          ),
+        ),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          toolbarHeight: !showSearchBar ? 65 : 75,
-          title: GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(FocusNode());
-            },
-            child: Container(
-              padding: EdgeInsets.only(top: 10),
-              child: Row(
-                children: [
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.list,
-                            color: Colors.black,
-                            size: 35,
-                          ),
-                        )
-                      : Container(),
-                  !showSearchBar ? SizedBox(width: 10) : Container(),
-                  Expanded(
-                    child: !showSearchBar
-                        ? Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  searchFocusNode.requestFocus();
-      
-                                  showSearchBar = !showSearchBar;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                                size: 27.5,
-                              ),
+          toolbarHeight: (selectedDistrict != '' ||
+                  selectedPriceRange.isNotEmpty ||
+                  selectedWeightRange.isNotEmpty)
+              ? showSearchBar
+                  ? 110
+                  : 100
+              : showSearchBar
+                  ? 70
+                  : 60,
+          title: Container(
+            padding: EdgeInsets.only(top: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    !showSearchBar
+                        ? IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.list,
+                              color: Colors.black,
+                              size: 35,
                             ),
                           )
-                        : TextField(
-                            focusNode: searchFocusNode,
-                            decoration: InputDecoration(
-                              fillColor: const Color.fromRGBO(0, 0, 0, 0),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                              ),
-                              suffixIcon: IconButton(
-                                onPressed: () {},
+                        : Container(),
+                    !showSearchBar ? SizedBox(width: 10) : Container(),
+                    Expanded(
+                      child: !showSearchBar
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    searchFocusNode.requestFocus();
+                                    showSearchBar = !showSearchBar;
+                                  });
+                                },
                                 icon: Icon(
-                                  Icons.mic_outlined,
+                                  Icons.search,
+                                  color: Colors.black,
+                                  size: 27.5,
                                 ),
                               ),
-                              hintText: 'Search Crop',
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                                borderSide:
-                                    BorderSide(width: 1, color: Colors.black),
+                            )
+                          : TextField(
+                              controller: searchText,
+                              onChanged: (text) {
+                                searchFilter();
+                              },
+                              focusNode: searchFocusNode,
+                              decoration: InputDecoration(
+                                fillColor: const Color.fromRGBO(0, 0, 0, 0),
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                ),
+                                suffixIcon: IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.mic_outlined,
+                                  ),
+                                ),
+                                hintText: 'Search Crop',
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  borderSide:
+                                      BorderSide(width: 1, color: Colors.black),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  borderSide:
+                                      BorderSide(width: 2, color: Colors.black),
+                                ),
+                                filled: true,
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                                borderSide:
-                                    BorderSide(width: 2, color: Colors.black),
-                              ),
-                              filled: true,
+                              style: TextStyle(fontSize: 15.0),
                             ),
-                            style: TextStyle(fontSize: 15.0),
-                          ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.filter_alt_outlined,
-                      size: 30,
                     ),
-                    onPressed: () {
-                      _showFilterSheet(context);
-                    },
+                    IconButton(
+                      icon: Icon(
+                        Icons.filter_alt_outlined,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        _showFilterSheet(context);
+                      },
+                    ),
+                    !showSearchBar
+                        ? IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => FavouritesScreen()),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.favorite,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
+                        : Container(),
+                    !showSearchBar
+                        ? IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfileScreen()),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.person,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
+                        : Container(),
+                  ],
+                ),
+                !showSearchBar
+                    ? Container()
+                    : SizedBox(
+                        height: 10,
+                      ),
+                if (selectedDistrict.isNotEmpty ||
+                    selectedWeightRange.isNotEmpty ||
+                    selectedPriceRange.isNotEmpty)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Wrap(
+                            spacing: 8.0,
+                            children: [
+                              if (selectedDistrict.isNotEmpty)
+                                Chip(
+                                  label: Text(selectedDistrict),
+                                  onDeleted: () {
+                                    setState(() {
+                                      selectedDistrict = '';
+                                      Filter();
+                                    });
+                                  },
+                                ),
+                              if (selectedWeightRange.isNotEmpty)
+                                Chip(
+                                  label: Text(
+                                      '${selectedWeightRange.first} - ${selectedWeightRange.last} kg'),
+                                  onDeleted: () {
+                                    setState(() {
+                                      selectedWeightRange = [];
+                                      Filter();
+                                    });
+                                  },
+                                ),
+                              if (selectedPriceRange.isNotEmpty)
+                                Chip(
+                                  label: Text(
+                                      'Rs.${selectedPriceRange.first} - Rs.${selectedPriceRange.last}'),
+                                  onDeleted: () {
+                                    setState(() {
+                                      selectedPriceRange = [];
+                                      Filter();
+                                    });
+                                  },
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => FavouritesScreen()),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.favorite,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      : Container(),
-                  !showSearchBar
-                      ? IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProfileScreen()),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.person,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        )
-                      : Container(),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -543,170 +1080,278 @@ class _FarmerScreenState extends State<FarmerScreen> {
           onTap: () {
             searchFocusNode.unfocus();
           },
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 15.0),
-            child: GestureDetector(
-              onTap: _showCropDetails,
-              child: Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                color: kColor2,
-                child: Container(
-                  height: size.height * 0.20,
-                  padding: EdgeInsets.all(15.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image(
-                                  width: size.width * 0.3,
-                                  height: size.height * 0.125,
-                                  fit: BoxFit.cover,
-                                  image: AssetImage("assets/images/crop.jpg"),
-                                ),
+          child: cropList.isEmpty && searchList.isEmpty
+              ? Center(
+                  child: Text('No crops found'),
+                )
+              : Container(
+                  padding: EdgeInsets.symmetric(horizontal: 15.0),
+                  child: ListView.builder(
+                      itemCount: unionCropList.length,
+                      itemBuilder: (context, index) {
+                        var data = unionCropList[index];
+                        return GestureDetector(
+                          onTap: () {
+                            _showCropDetails(data);
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(top: 10),
+                            child: Card(
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                'Crop Name',
-                                style: TextStyle(
-                                    color: Color(0xFF222325),
-                                    fontSize: size.height * 0.0175,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 20),
-                            child: Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Farmer Name',
-                                    style: TextStyle(
-                                      color: Color(0xFF222325),
-                                      fontSize: size.height * 0.0175,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    'District',
-                                    style: TextStyle(
-                                        color: Color(0xFF072471),
-                                        fontSize: size.height * 0.015,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    'Weight',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: size.height * 0.015,
-                                        color: Color(0xFF222325)),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    'Price',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: size.height * 0.015,
-                                        color: Color(0xFF222325)),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        child: Row(
+                              color: kColor2,
+                              child: Container(
+                                height: size.height * 0.20,
+                                padding: EdgeInsets.all(15.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
                                           children: [
                                             ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(10),
-                                              child: Container(
-                                                padding: EdgeInsets.zero,
-                                                color: kColor,
-                                                child: IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    size: 17,
-                                                    Icons.chat_bubble,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
+                                              child: Image(
+                                                width: size.width * 0.3,
+                                                height: size.height * 0.125,
+                                                fit: BoxFit.cover,
+                                                image: AssetImage(
+                                                    "assets/images/crop.jpg"),
                                               ),
                                             ),
                                             SizedBox(
-                                              width: 10,
+                                              height: 10,
                                             ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Container(
-                                                padding: EdgeInsets.zero,
-                                                color: kColor,
-                                                child: IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    size: 17,
-                                                    Icons.call,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Container(
-                                                padding: EdgeInsets.zero,
-                                                color: kColor,
-                                                child: IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    size: 17,
-                                                    Icons.favorite,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
+                                            Text(
+                                              data['cropType'],
+                                              style: TextStyle(
+                                                  color: Color(0xFF222325),
+                                                  fontSize:
+                                                      size.height * 0.0175,
+                                                  fontWeight: FontWeight.w700),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
-                                  )
-                                ],
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 20),
+                                          child: Container(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.person,
+                                                      color: Colors.black,
+                                                      size: 17.5,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      data['farmerName'],
+                                                      style: TextStyle(
+                                                        color:
+                                                            Color(0xFF222325),
+                                                        fontSize: size.height *
+                                                            0.0175,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 3,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.location_on,
+                                                      color: Colors.red,
+                                                      size: 15,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      data['district'],
+                                                      style: TextStyle(
+                                                          color: kColor4,
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.015,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 3,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      'Weight :',
+                                                      style: TextStyle(
+                                                          color: kColor4,
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.015,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      '${data['weight']} kg',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.015,
+                                                          color: Color(
+                                                              0xFF222325)),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 3,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      'Price :',
+                                                      style: TextStyle(
+                                                          color: kColor4,
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.015,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      'Rs. ${data['price']}',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.015,
+                                                          color: Color(
+                                                              0xFF222325)),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      child: Row(
+                                                        children: [
+                                                          // ClipRRect(
+                                                          //   borderRadius:
+                                                          //       BorderRadius
+                                                          //           .circular(10),
+                                                          //   child: Container(
+                                                          //     padding:
+                                                          //         EdgeInsets.zero,
+                                                          //     color: kColor,
+                                                          //     child: IconButton(
+                                                          //       onPressed: () {},
+                                                          //       icon: Icon(
+                                                          //         size: 17,
+                                                          //         Icons
+                                                          //             .chat_bubble,
+                                                          //         color: Colors
+                                                          //             .white,
+                                                          //       ),
+                                                          //     ),
+                                                          //   ),
+                                                          // ),
+                                                          // SizedBox(
+                                                          //   width: 10,
+                                                          // ),
+                                                          ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              color: kColor,
+                                                              child: IconButton(
+                                                                onPressed:
+                                                                    () {},
+                                                                icon: Icon(
+                                                                  size: 17,
+                                                                  Icons.call,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              color: kColor,
+                                                              child: IconButton(
+                                                                onPressed:
+                                                                    () {},
+                                                                icon: Icon(
+                                                                  size: 17,
+                                                                  Icons
+                                                                      .favorite,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        );
+                      }),
                 ),
-              ),
-            ),
-          ),
         ),
       ),
     );
