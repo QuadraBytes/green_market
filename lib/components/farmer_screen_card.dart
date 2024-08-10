@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FarmerScreenCard extends StatelessWidget {
   final String cropType;
@@ -18,6 +19,18 @@ class FarmerScreenCard extends StatelessWidget {
     required this.requiredDate,
     required this.phoneNumber,
   }) : super(key: key);
+
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $phoneNumber';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +149,8 @@ class FarmerScreenCard extends StatelessWidget {
                                       padding: EdgeInsets.zero,
                                       color: kColor,
                                       child: IconButton(
-                                        onPressed: () {},
+                                        onPressed: () =>
+                                            _makePhoneCall(phoneNumber),
                                         icon: Icon(
                                           size: 17,
                                           Icons.call,
