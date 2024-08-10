@@ -154,20 +154,16 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     SizedBox(
                       height: 50,
                     ),
-                    // TextFormField(
-                    //   style: TextStyle(fontWeight: FontWeight.w500),
-                    //   decoration: InputDecoration(labelText: "Farmer's Name"),
-                    //   // validator: (value) {
-                    //   //   if (value == null || value.isEmpty) {
-                    //   //     return "Please enter farmer's name";
-                    //   //   }
-                    //   //   return null;
-                    //   // },
-                    //   onSaved: (value) {
-                    //     _farmerName = value;
-                    //   },
-                    // ),
-                    // SizedBox(height: 15),
+
+                    TextFormField(
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(labelText: "Farmer's Name"),
+                      onSaved: (value) {
+                        _farmerName = value;
+                      },
+                    ),
+                    SizedBox(height: 15),
+
                     DropdownButtonFormField<String>(
                       menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
                       decoration: InputDecoration(
@@ -195,12 +191,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                           _district = value;
                         });
                       },
-                      // validator: (value) {
-                      //   if (value == null) {
-                      //     return 'Please select a district';
-                      //   }
-                      //   return null;
-                      // },
                     ),
                     SizedBox(height: 15),
                     TextFormField(
@@ -215,12 +205,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             Icons.location_on,
                             size: 20,
                           )),
-                      // validator: (value) {
-                      //   if (value == null || value.isEmpty) {
-                      //     return 'Please enter address';
-                      //   }
-                      //   return null;
-                      // },
                       onSaved: (value) {
                         _address = value;
                       },
@@ -240,12 +224,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                     fontWeight: FontWeight.normal),
                                 hintText: 'XX XXX XXX'),
                             style: TextStyle(fontWeight: FontWeight.w500),
-                            // validator: (value) {
-                            //   if (value == null || value.isEmpty) {
-                            //     return 'Please enter phone number';
-                            //   }
-                            //   return null;
-                            // },
                             onSaved: (value) {
                               _phoneNumber = value;
                             },
@@ -274,12 +252,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 _cropType = value;
                               });
                             },
-                            // validator: (value) {
-                            //   if (value == null) {
-                            //     return 'Please select a crop type';
-                            //   }
-                            //   return null;
-                            // },
                           ),
                         ),
                       ],
@@ -309,12 +281,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 _weight = value;
                               });
                             },
-                            // validator: (value) {
-                            //   if (value == null) {
-                            //     return 'Please select a weight';
-                            //   }
-                            //   return null;
-                            // },
                           ),
                         ),
                         SizedBox(width: 20),
@@ -341,29 +307,11 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 _farmerType = value;
                               });
                             },
-                            // validator: (value) {
-                            //   if (value == null) {
-                            //     return 'Please select a weight';
-                            //   }
-                            //   return null;
-                            // },
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 15),
-                    // ListTile(
-                    //   title: Text(
-                    //       "Available Date: ${_availableDate?.toLocal().toIso8601String().substring(0, 10) ?? 'Not selected'}"),
-                    //   trailing: Icon(Icons.calendar_today),
-                    //   onTap: () => _selectDate(context, true),
-                    // ),
-                    // ListTile(
-                    //   title: Text(
-                    //       "Expiring Date: ${_expiringDate?.toLocal().toIso8601String().substring(0, 10) ?? 'Not selected'}"),
-                    //   trailing: Icon(Icons.calendar_today),
-                    //   onTap: () => _selectDate(context, false),
-                    // ),
                     Row(
                       children: [
                         Expanded(
@@ -382,12 +330,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                           .toIso8601String()
                                           .substring(0, 10),
                                 ),
-                                // validator: (value) {
-                                //   if (_availableDate == null) {
-                                //     return 'Please select the available date';
-                                //   }
-                                //   return null;
-                                // },
                               ),
                             ),
                           ),
@@ -408,12 +350,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                             ?.toLocal()
                                             .toIso8601String()
                                             .substring(0, 10)),
-                                // validator: (value) {
-                                //   if (_expiringDate == null) {
-                                //     return 'Please select the expire date';
-                                //   }
-                                //   return null;
-                                // },
                               ),
                             ),
                           ),
@@ -446,12 +382,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 _price = value;
                               });
                             },
-                            // validator: (value) {
-                            //   if (value == null) {
-                            //     return 'Please select a price';
-                            //   }
-                            //   return null;
-                            // },
                           ),
                         ),
                         SizedBox(width: 20),
@@ -460,12 +390,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             decoration: InputDecoration(
                                 labelText: 'Cultivated Area', suffixText: 'ha'),
                             style: TextStyle(fontWeight: FontWeight.w500),
-                            // validator: (value) {
-                            //   if (value == null || value.isEmpty) {
-                            //     return 'Please enter cultivated area';
-                            //   }
-                            //   return null;
-                            // },
                             onSaved: (value) {
                               _cultivatedArea = value;
                             },
@@ -474,48 +398,47 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       ],
                     ),
                     SizedBox(height: 15),
-                    // GestureDetector(
-                    //   onTap: _images.length == 2 ? null : _pickImage,
-                    //   child: AbsorbPointer(
-                    //     child: TextFormField(
-                    //       decoration: InputDecoration(
-                    //           labelText: _images.length == 0
-                    //               ? 'Upload Images (2)'
-                    //               : _images.length == 1
-                    //                   ? 'One Image is Uploaded'
-                    //                   : 'Two Images are Uploaded',
-                    //           suffixIcon: Icon(Icons.add_a_photo)),
-                    //       style: TextStyle(fontWeight: FontWeight.w500),
-                    //       validator: (_) {
-                    //         if (_images.isEmpty) {
-                    //           return 'Please add an image';
-                    //         }
-                    //         return null;
-                    //       },
-                    //     ),
-                    //   ),
-                    // ),
-                    // SizedBox(height: 15),
-
-                    // Wrap(
-                    //   alignment: WrapAlignment.center,
-                    //   spacing: 10,
-                    //   children: _images.asMap().entries.map((entry) {
-                    //     int index = entry.key;
-                    //     File imageFile = entry.value;
-                    //     return Stack(
-                    //       alignment: Alignment.topRight,
-                    //       children: [
-                    //         Image.file(imageFile,
-                    //             width: 150, height: 150, fit: BoxFit.contain),
-                    //         IconButton(
-                    //           icon: Icon(Icons.cancel, color: kColor),
-                    //           onPressed: () => _removeImage(index),
-                    //         ),
-                    //       ],
-                    //     );
-                    //   }).toList(),
-                    // ),
+                    GestureDetector(
+                      onTap: _images.length == 2 ? null : _pickImage,
+                      child: AbsorbPointer(
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              labelText: _images.length == 0
+                                  ? 'Upload Images (2)'
+                                  : _images.length == 1
+                                      ? 'One Image is Uploaded'
+                                      : 'Two Images are Uploaded',
+                              suffixIcon: Icon(Icons.add_a_photo)),
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                          // validator: (_) {
+                          //   if (_images.isEmpty) {
+                          //     return 'Please add an image';
+                          //   }
+                          //   return null;
+                          // },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 10,
+                      children: _images.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        File imageFile = entry.value;
+                        return Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            Image.file(imageFile,
+                                width: 150, height: 150, fit: BoxFit.contain),
+                            IconButton(
+                              icon: Icon(Icons.cancel, color: kColor),
+                              onPressed: () => _removeImage(index),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
                     SizedBox(height: 30),
                     Column(
                       children: [
@@ -548,11 +471,6 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     ),
                   ],
                 ),
-                // _image == null ? Text('No image selected.') : Image.file(_image!),
-                // ElevatedButton(
-                //   onPressed: _pickImage,
-                //   child: Text('Upload Photo'),
-                // ),
               ),
             ),
             Positioned(

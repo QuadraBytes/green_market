@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:green_market/components/farmer_screen_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
@@ -6,9 +7,12 @@ import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_crop_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
+
 late User? loggedInUser;
+
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -1181,6 +1185,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
           onTap: () {
             searchFocusNode.unfocus();
           },
+
           child: cropList.isEmpty
               ? Center(
                   child: CircularProgressIndicator(
