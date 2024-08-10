@@ -571,19 +571,19 @@ class _FarmerScreenState extends State<FarmerScreen> {
                       return ListView.builder(
                         itemCount: data.size,
                         itemBuilder: (context, index) {
-                          var crop = data.docs[index];
+                          var req = data.docs[index];
                           DateTime requiredDate =
-                              (crop['requiredDate'] as Timestamp).toDate();
+                              (req['requiredDate'] as Timestamp).toDate();
 
                           String formattedReqDate =
                               DateFormat('yyyy-MM-dd').format(requiredDate);
                           return FarmerScreenCard(
-                            buyerName: crop['buyerName'],
-                            cropType: crop['cropType'],
-                            district: crop['district'],
-                            weight: crop['weight'],
+                            buyerName: req['buyerName'],
+                            cropType: req['cropType'],
+                            district: req['district'],
+                            weight: req['weight'],
                             requiredDate: formattedReqDate,
-                            phoneNumber: crop['phoneNumber'],
+                            phoneNumber: req['phoneNumber'],
                           );
                         },
                       );
