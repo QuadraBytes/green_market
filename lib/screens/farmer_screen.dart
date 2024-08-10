@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:green_market/components/farmer_screen_card.dart';
+
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
@@ -5,6 +8,7 @@ import 'package:green_market/screens/add_crop_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -405,23 +409,23 @@ class _FarmerScreenState extends State<FarmerScreen> {
 
     return SafeArea(
       child: Scaffold(
-        floatingActionButton:  ClipRRect(
-                borderRadius: BorderRadius.circular(50),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AddCropScreen()),
-                    );
-                  },
-                  child: Icon(
-                    Icons.add,
-                    size: 35,
-                    color: Colors.white,
-                  ),
-                  backgroundColor: kColor,
-                ),
-              ),
+        floatingActionButton: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddCropScreen()),
+              );
+            },
+            child: Icon(
+              Icons.add,
+              size: 35,
+              color: Colors.white,
+            ),
+            backgroundColor: kColor,
+          ),
+        ),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           toolbarHeight: !showSearchBar ? 65 : 75,
@@ -452,7 +456,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
                               onPressed: () {
                                 setState(() {
                                   searchFocusNode.requestFocus();
-      
+
                                   showSearchBar = !showSearchBar;
                                 });
                               },
@@ -546,166 +550,46 @@ class _FarmerScreenState extends State<FarmerScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 15.0),
             child: GestureDetector(
-              onTap: _showCropDetails,
-              child: Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                color: kColor2,
+                onTap: _showCropDetails,
                 child: Container(
-                  height: size.height * 0.20,
-                  padding: EdgeInsets.all(15.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image(
-                                  width: size.width * 0.3,
-                                  height: size.height * 0.125,
-                                  fit: BoxFit.cover,
-                                  image: AssetImage("assets/images/crop.jpg"),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                'Crop Name',
-                                style: TextStyle(
-                                    color: Color(0xFF222325),
-                                    fontSize: size.height * 0.0175,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 20),
-                            child: Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Farmer Name',
-                                    style: TextStyle(
-                                      color: Color(0xFF222325),
-                                      fontSize: size.height * 0.0175,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    'District',
-                                    style: TextStyle(
-                                        color: Color(0xFF072471),
-                                        fontSize: size.height * 0.015,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    'Weight',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: size.height * 0.015,
-                                        color: Color(0xFF222325)),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    'Price',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: size.height * 0.015,
-                                        color: Color(0xFF222325)),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        child: Row(
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Container(
-                                                padding: EdgeInsets.zero,
-                                                color: kColor,
-                                                child: IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    size: 17,
-                                                    Icons.chat_bubble,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Container(
-                                                padding: EdgeInsets.zero,
-                                                color: kColor,
-                                                child: IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    size: 17,
-                                                    Icons.call,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Container(
-                                                padding: EdgeInsets.zero,
-                                                color: kColor,
-                                                child: IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    size: 17,
-                                                    Icons.favorite,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  padding: EdgeInsets.symmetric(horizontal: 15.0),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('requirements')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Something went wrong'));
+                      }
+
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      final data = snapshot.requireData;
+
+                      return ListView.builder(
+                        itemCount: data.size,
+                        itemBuilder: (context, index) {
+                          var crop = data.docs[index];
+                          DateTime requiredDate =
+                              (crop['requiredDate'] as Timestamp).toDate();
+
+                          String formattedReqDate =
+                              DateFormat('yyyy-MM-dd').format(requiredDate);
+                          return FarmerScreenCard(
+                            buyerName: crop['buyerName'],
+                            cropType: crop['cropType'],
+                            district: crop['district'],
+                            weight: crop['weight'],
+                            requiredDate: formattedReqDate,
+                            phoneNumber: crop['phoneNumber'],
+                          );
+                        },
+                      );
+                    },
                   ),
-                ),
-              ),
-            ),
+                )),
           ),
         ),
       ),
