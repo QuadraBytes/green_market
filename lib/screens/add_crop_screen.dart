@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:green_market/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+late User? loggedInUser;
 
 class AddCropScreen extends StatefulWidget {
   const AddCropScreen({super.key});
@@ -27,11 +30,24 @@ class _AddCropScreenState extends State<AddCropScreen> {
   DateTime? _expiringDate;
   String? _price;
   List<File> _images = [];
+  final _auth = FirebaseAuth.instance;
 
   final ImagePicker _picker = ImagePicker();
 
   final CollectionReference cropsCollection =
       FirebaseFirestore.instance.collection('crops');
+
+  Future<void> getUserData() async {
+    loggedInUser = await _auth.currentUser!;
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(loggedInUser?.email)
+        .get();
+
+    setState(() {
+      _farmerName = userSnapshot['displayName'].toString();
+    });
+  }
 
   Future<void> _selectDate(BuildContext context, bool isAvailableDate) async {
     final DateTime? picked = await showDatePicker(
@@ -70,8 +86,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if (_farmerName == null ||
-          _district == null ||
+      if (_district == null ||
           _address == null ||
           _phoneNumber == null ||
           _availableDate == null ||
@@ -89,6 +104,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
       try {
         await cropsCollection.add({
+          'userId': loggedInUser?.uid,
           'farmerName': _farmerName,
           'district': _district,
           'address': _address,
@@ -102,10 +118,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'price': _price,
           'images': _images.map((image) => image.path).toList(),
         });
-        await ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Crop added successfully'),
-          backgroundColor: kColor,
-        ));
+
         Navigator.pop(context);
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -141,6 +154,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     SizedBox(
                       height: 50,
                     ),
+
                     TextFormField(
                       style: TextStyle(fontWeight: FontWeight.w500),
                       decoration: InputDecoration(labelText: "Farmer's Name"),
@@ -149,6 +163,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       },
                     ),
                     SizedBox(height: 15),
+
                     DropdownButtonFormField<String>(
                       menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
                       decoration: InputDecoration(

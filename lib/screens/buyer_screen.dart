@@ -770,10 +770,12 @@ class _BuyerScreenState extends State<BuyerScreen> {
           },
           child: requireList.isEmpty
               ? Center(
+
                   child: CircularProgressIndicator(
                     color: kColor,
                   ),
                 )
+
               : unionRequireList.isEmpty
                   ? Center(
                       child: Text(
@@ -830,6 +832,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                           },
                         ),
                       )),
+
                     ),
         ),
       ),
