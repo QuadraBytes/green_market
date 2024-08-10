@@ -29,24 +29,15 @@ const districts = [
 ];
 
 const priceRange = [
-  "100", 
-  "200", 
-  "300", 
-  "400", 
-  "500", 
-  "600"
+  "1000",
+  "2000",
+  "5000",
+  "10000",
+  "20000",
+  "50000",
+  "100000"
 ];
 
-const weightRange = [
-  "1",
-  "2", 
-  "3", 
-  "4", 
-  "5", 
-  "6"
-];
+const weightRange = ["5", "10", "20", "40", "60", "70", "100"];
 
-const groupType = [
-  'Single',
-  'Group'
-];
+const groupType = ['Single', 'Group'];

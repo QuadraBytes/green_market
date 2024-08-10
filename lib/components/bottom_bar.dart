@@ -43,6 +43,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     return SafeArea(
       child: Scaffold(
         body: PageView(
+          physics: const NeverScrollableScrollPhysics(),
           controller: _page,
           onPageChanged: (value) {
             setState(() {
