@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
+import 'package:green_market/components/side_bar.dart';
 
 class AvailabilityScreen extends StatefulWidget {
   const AvailabilityScreen({super.key});
@@ -14,24 +15,31 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
     final size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
+        drawer: SideBar(),
         body: Stack(
           children: [
-            Positioned(top: -10, child: Image.asset('assets/images/appbar2.png')),
             Positioned(
-              top: 50,
+                top: -50, child: Image.asset('assets/images/appbar2.png')),
+            Positioned(
+              top: 20,
               left: 10,
-              child: IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
+              child: Builder(
+                builder: (context) {
+                  return IconButton(
+                    icon: Icon(
+                      Icons.list,
+                      color: Colors.white,
+                      size: 35,
+                    ),
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                  );
                 },
               ),
             ),
             Positioned(
-              top: 60,
+              top: 25,
               left: size.width * 0.35,
               right: size.width * 0.3,
               child: Text('Availability',
@@ -41,10 +49,9 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
                       color: Colors.white)),
             ),
             Positioned(
-              top: 150,
+              top: 100,
               left: 0,
               right: 0,
-              bottom: 56,
               child: Column(
                 children: [
                   Container(

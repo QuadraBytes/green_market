@@ -47,7 +47,7 @@ dependencies:
   http: ^1.2.2
   email_otp: ^3.0.2
   pinput: ^5.0.0
-
+  community_material_icon: ^5.9.55
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +75,8 @@ flutter:
   assets:
     - assets/images/crop.jpg
     - assets/images/logo.png
+    - assets/images/logo_bg.png
+    - assets/images/logo1_bg.png
     - assets/images/logo1.png
     - assets/images/splash_logo.png
     # - assets/images/Background.jpg
@@ -82,6 +84,17 @@ flutter:
     - assets/images/appbar1.png
     - assets/images/appbar2.png
     - assets/images/profile.png
+    # - assets/images/logo3.png
+    - assets/images/farmer.jpg
+    - assets/images/facebook.png
+    - assets/images/instagram.png
+    - assets/images/profile.png
+    - assets/images/splash_logo.png
+    - assets/images/watchnow.png
+    - assets/images/whatsapp.png
+    - assets/images/youtube.png
+    - assets/images/buyer.jpg
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

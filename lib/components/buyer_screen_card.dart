@@ -45,15 +45,15 @@ class BuyerScreenCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
+                  width: size.width * 0.8,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: size.width * 0.8,
                         child: Row(
                           children: [
                             Text(
-                              'Crop Name : $cropType',
+                              '$cropType',
                               style: TextStyle(
                                   color: Color(0xFF222325),
                                   fontSize: size.height * 0.0175,
@@ -71,7 +71,7 @@ class BuyerScreenCard extends StatelessWidget {
                                   width: 5,
                                 ),
                                 Text(
-                                  'District : $district',
+                                  '$district',
                                   style: TextStyle(
                                       color: kColor4,
                                       fontSize: size.height * 0.015,
@@ -94,7 +94,7 @@ class BuyerScreenCard extends StatelessWidget {
                             width: 5,
                           ),
                           Text(
-                            'Farmer Name : $farmerName',
+                            '$farmerName',
                             style: TextStyle(
                               color: Color(0xFF222325),
                               fontSize: size.height * 0.0175,
@@ -159,7 +159,7 @@ class BuyerScreenCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Spacer(),
+                            // Spacer(),
                             // ClipRRect(
                             //   borderRadius:
                             //       BorderRadius.circular(10),
@@ -200,9 +200,9 @@ class BuyerScreenCard extends StatelessWidget {
                             //           ),
                             //         ),
                             //       ),
-                            SizedBox(
-                              width: 10,
-                            ),
+                            // SizedBox(
+                            //   width: 10,
+                            // ),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: Container(
