@@ -3,6 +3,7 @@ import 'package:green_market/components/farmer_screen_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/constants.dart';
+import 'package:green_market/components/side_bar.dart';
 import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_crop_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
@@ -10,9 +11,7 @@ import 'package:green_market/screens/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
-
 late User? loggedInUser;
-
 
 class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
@@ -995,6 +994,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
             backgroundColor: kColor,
           ),
         ),
+        drawer: const SideBar(),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           toolbarHeight: (selectedDistrict != '' ||
@@ -1014,13 +1014,19 @@ class _FarmerScreenState extends State<FarmerScreen> {
                 Row(
                   children: [
                     !showSearchBar
-                        ? IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.list,
-                              color: Colors.black,
-                              size: 35,
-                            ),
+                        ? Builder(
+                            builder: (context) {
+                              return IconButton(
+                                icon: Icon(
+                                  Icons.list,
+                                  color: Colors.black,
+                                  size: 35,
+                                ),
+                                onPressed: () {
+                                  Scaffold.of(context).openDrawer();
+                                },
+                              );
+                            },
                           )
                         : Container(),
                     !showSearchBar ? SizedBox(width: 10) : Container(),
@@ -1185,7 +1191,6 @@ class _FarmerScreenState extends State<FarmerScreen> {
           onTap: () {
             searchFocusNode.unfocus();
           },
-
           child: cropList.isEmpty
               ? Center(
                   child: CircularProgressIndicator(

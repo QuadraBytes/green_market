@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:green_market/components/buyer_screen_card.dart';
 import 'package:green_market/components/constants.dart';
+import 'package:green_market/components/side_bar.dart';
 import 'package:green_market/models/models.dart';
 import 'package:green_market/screens/add_requirement_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
@@ -588,6 +588,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
             backgroundColor: kColor,
           ),
         ),
+        drawer: SideBar(),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           toolbarHeight:
@@ -610,13 +611,19 @@ class _BuyerScreenState extends State<BuyerScreen> {
                   Row(
                     children: [
                       !showSearchBar
-                          ? IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.list,
-                                color: Colors.black,
-                                size: 35,
-                              ),
+                          ? Builder(
+                              builder: (context) {
+                                return IconButton(
+                                  icon: Icon(
+                                    Icons.list,
+                                    color: Colors.black,
+                                    size: 35,
+                                  ),
+                                  onPressed: () {
+                                    Scaffold.of(context).openDrawer();
+                                  },
+                                );
+                              },
                             )
                           : Container(),
                       !showSearchBar ? SizedBox(width: 10) : Container(),
@@ -770,12 +777,10 @@ class _BuyerScreenState extends State<BuyerScreen> {
           },
           child: requireList.isEmpty
               ? Center(
-
                   child: CircularProgressIndicator(
                     color: kColor,
                   ),
                 )
-
               : unionRequireList.isEmpty
                   ? Center(
                       child: Text(
@@ -787,52 +792,277 @@ class _BuyerScreenState extends State<BuyerScreen> {
                     )
                   : Container(
                       padding: EdgeInsets.symmetric(horizontal: 15.0),
-                      child: GestureDetector(
-                          // onTap: _showCropDetails,
-                          child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 15.0),
-                        child: StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection('crops')
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              return Center(
-                                  child: Text('Something went wrong'));
-                            }
+                      child: ListView.builder(
+                          itemCount: unionRequireList.length,
+                          itemBuilder: (context, index) {
+                            var data = unionRequireList[index];
+                            Timestamp timestamp = data['requiredDate'];
+                            String formattedDate = _formatTimestamp(timestamp);
+                            bool isRequireFavourite = isFavourite(data.id);
 
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
-                            }
-
-                            final data = snapshot.requireData;
-
-                            return ListView.builder(
-                              itemCount: data.size,
-                              itemBuilder: (context, index) {
-                                var crop = data.docs[index];
-                                DateTime expiringDate =
-                                    (crop['expiringDate'] as Timestamp)
-                                        .toDate();
-
-                                String formattedReqDate =
-                                    DateFormat('yyyy-MM-dd')
-                                        .format(expiringDate);
-                                return BuyerScreenCard(
-                                  farmerName: crop['farmerName'],
-                                  cropType: crop['cropType'],
-                                  district: crop['district'],
-                                  weight: crop['weight'],
-                                  expiringDate: formattedReqDate,
-                                  price: crop['price'],
-                                );
+                            return GestureDetector(
+                              onTap: () {
+                                searchFocusNode.unfocus();
                               },
-                            );
-                          },
-                        ),
-                      )),
+                              child: Container(
+                                margin: EdgeInsets.only(top: 10),
+                                child: Card(
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  color: kColor2,
+                                  child: Container(
+                                    height: size.height * 0.15,
+                                    padding: EdgeInsets.all(15.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    width: size.width * 0.8,
+                                                    child: Row(
+                                                      children: [
+                                                        Text(
+                                                          data['cropType'],
+                                                          style: TextStyle(
+                                                              color: Color(
+                                                                  0xFF222325),
+                                                              fontSize:
+                                                                  size.height *
+                                                                      0.0175,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
+                                                        ),
+                                                        Spacer(),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons.location_on,
+                                                              color: Colors.red,
+                                                              size: 15,
+                                                            ),
+                                                            SizedBox(
+                                                              width: 5,
+                                                            ),
+                                                            Text(
+                                                              data['district'],
+                                                              style: TextStyle(
+                                                                  color:
+                                                                      kColor4,
+                                                                  fontSize:
+                                                                      size.height *
+                                                                          0.015,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 5),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.person,
+                                                        color: Colors.black,
+                                                        size: 17.5,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                        data['buyerName'],
+                                                        style: TextStyle(
+                                                          color:
+                                                              Color(0xFF222325),
+                                                          fontSize:
+                                                              size.height *
+                                                                  0.0175,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                  Container(
+                                                    width: size.width * 0.8,
+                                                    child: Row(
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Weight :',
+                                                                  style: TextStyle(
+                                                                      color:
+                                                                          kColor4,
+                                                                      fontSize:
+                                                                          size.height *
+                                                                              0.015,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                Text(
+                                                                  '${data['weight']} kg',
+                                                                  style: TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      fontSize:
+                                                                          size.height *
+                                                                              0.015,
+                                                                      color: Color(
+                                                                          0xFF222325)),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                              height: 5,
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Required Date :',
+                                                                  style: TextStyle(
+                                                                      color:
+                                                                          kColor4,
+                                                                      fontSize:
+                                                                          size.height *
+                                                                              0.015,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                Text(
+                                                                  formattedDate,
+                                                                  style: TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      fontSize:
+                                                                          size.height *
+                                                                              0.015,
+                                                                      color: Color(
+                                                                          0xFF222325)),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Spacer(),
+                                                        // ClipRRect(
+                                                        //   borderRadius:
+                                                        //       BorderRadius.circular(10),
+                                                        //   child: Container(
+                                                        //     padding: EdgeInsets.zero,
+                                                        //     color: kColor,
+                                                        //     child: IconButton(
+                                                        //       onPressed: () {},
+                                                        //       icon: Icon(
+                                                        //         size: 17,
+                                                        //         Icons.chat_bubble,
+                                                        //         color: Colors.white,
+                                                        //       ),
+                                                        //     ),
+                                                        //   ),
+                                                        // ),
+                                                        // Spacer(),
+                                                        // SizedBox(
+                                                        //   width: 10,
+                                                        // ),
 
+                                                        isRequireFavourite
+                                                            ? Container()
+                                                            : ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                                child:
+                                                                    Container(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                  color: kColor,
+                                                                  child:
+                                                                      IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      addFavourites(
+                                                                          data.id);
+                                                                    },
+                                                                    icon: Icon(
+                                                                      size: 17,
+                                                                      Icons
+                                                                          .favorite,
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                        SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                          child: Container(
+                                                            padding:
+                                                                EdgeInsets.zero,
+                                                            color: kColor,
+                                                            child: IconButton(
+                                                              onPressed: () {},
+                                                              icon: Icon(
+                                                                size: 17,
+                                                                Icons.call,
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
                     ),
         ),
       ),

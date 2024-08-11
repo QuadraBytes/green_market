@@ -121,148 +121,150 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.4,
-              width: MediaQuery.of(context).size.width * 0.4,
-              child: Image.asset("assets/images/logo.png"),
-            ),
-            //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
-            const Text(
-              "VERIFY EMAIL",
-              style: TextStyle(
-                  fontSize: 20,
-                  letterSpacing: 3,
-                  fontStyle: FontStyle.normal,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
-            ),
-
-            SizedBox(height: MediaQuery.of(context).size.height * 0.025),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                hintText: "Enter your email",
-                prefixIcon: Icon(Icons.email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+                width: MediaQuery.of(context).size.width * 0.4,
+                child: Image.asset("assets/images/logo.png"),
+              ),
+              //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
+              const Text(
+                "VERIFY EMAIL",
+                style: TextStyle(
+                    fontSize: 20,
+                    letterSpacing: 3,
+                    fontStyle: FontStyle.normal,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold),
+              ),
+      
+              SizedBox(height: MediaQuery.of(context).size.height * 0.025),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  hintText: "Enter your email",
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            showOtp ? const Text('Didn\'t receive the otp code?') : Container(),
-            showOtp ? const SizedBox(height: 10) : Container(),
-            showSendProgress
-                ? const CircularProgressIndicator(
-                    color: kColor,
-                  )
-                : showOtp
-                    ? ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kColor,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 20),
+              showOtp ? const Text('Didn\'t receive the otp code?') : Container(),
+              showOtp ? const SizedBox(height: 10) : Container(),
+              showSendProgress
+                  ? const CircularProgressIndicator(
+                      color: kColor,
+                    )
+                  : showOtp
+                      ? ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kColor,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            showSendProgress = true;
-                          });
-                          sendOtp();
-                        },
-                        child: Text("Resend OTP",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                      )
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kColor,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                          onPressed: () {
+                            setState(() {
+                              showSendProgress = true;
+                            });
+                            sendOtp();
+                          },
+                          child: Text("Resend OTP",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        )
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kColor,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
+                          onPressed: sendOtp,
+                          child: Text("Send OTP",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                         ),
-                        onPressed: sendOtp,
-                        child: Text("Send OTP",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
+      
+              const SizedBox(height: 50),
+              showOtp
+                  ? const Text(
+                      'Verification Code',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    )
+                  : Container(),
+              showOtp ? const SizedBox(height: 20) : Container(),
+              showOtp
+                  ? Pinput(
+                      controller: otpController,
+                      length: 6,
+                      defaultPinTheme: PinTheme(
+                        textStyle:
+                            const TextStyle(fontSize: 30, color: Colors.black),
+                        width: 50,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(38, 68, 137, 255),
+                          border: Border.all(
+                              color: const Color(0xFF448AFF), width: 2.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-
-            const SizedBox(height: 50),
-            showOtp
-                ? const Text(
-                    'Verification Code',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  )
-                : Container(),
-            showOtp ? const SizedBox(height: 20) : Container(),
-            showOtp
-                ? Pinput(
-                    controller: otpController,
-                    length: 6,
-                    defaultPinTheme: PinTheme(
-                      textStyle:
-                          const TextStyle(fontSize: 30, color: Colors.black),
-                      width: 50,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(38, 68, 137, 255),
-                        border: Border.all(
-                            color: const Color(0xFF448AFF), width: 2.5),
-                        borderRadius: BorderRadius.circular(10),
+                      focusedPinTheme: PinTheme(
+                        textStyle:
+                            const TextStyle(fontSize: 30, color: Colors.black),
+                        width: 50,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(38, 68, 137, 255),
+                          border:
+                              Border.all(color: Colors.blueAccent, width: 2.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                    ),
-                    focusedPinTheme: PinTheme(
-                      textStyle:
-                          const TextStyle(fontSize: 30, color: Colors.black),
-                      width: 50,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(38, 68, 137, 255),
-                        border:
-                            Border.all(color: Colors.blueAccent, width: 2.5),
-                        borderRadius: BorderRadius.circular(10),
+                    )
+                  : Container(),
+              showOtp ? const SizedBox(height: 20) : Container(),
+              showOtp
+                  ? ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kColor,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                    ),
-                  )
-                : Container(),
-            showOtp ? const SizedBox(height: 20) : Container(),
-            showOtp
-                ? ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kColor,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      verifyOtp();
-                    },
-                    child: Text("Verify Email",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold)),
-                  )
-                : Container(),
-            showOtp ? const SizedBox(height: 10) : Container(),
-            showOtp
-                ? Text(
-                    'OTP is expired in $countdown seconds',
-                  )
-                : Container(),
-          ],
+                      onPressed: () {
+                        verifyOtp();
+                      },
+                      child: Text("Verify Email",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold)),
+                    )
+                  : Container(),
+              showOtp ? const SizedBox(height: 10) : Container(),
+              showOtp
+                  ? Text(
+                      'OTP is expired in $countdown seconds',
+                    )
+                  : Container(),
+            ],
+          ),
         ),
       ),
     );
