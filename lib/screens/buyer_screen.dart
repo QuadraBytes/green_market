@@ -679,7 +679,8 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                 style: TextStyle(fontSize: 15.0),
                               ),
                       ),
-                      IconButton(
+                        !showSearchBar
+                        ?  IconButton(
                         icon: Icon(
                           Icons.filter_alt_outlined,
                           size: 30,
@@ -687,7 +688,7 @@ class _BuyerScreenState extends State<BuyerScreen> {
                         onPressed: () {
                           _showFilterSheet(context);
                         },
-                      ),
+                      ) : Container(),
                       !showSearchBar
                           ? IconButton(
                               onPressed: () {

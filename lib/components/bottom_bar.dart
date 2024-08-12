@@ -58,6 +58,8 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             topRight: Radius.circular(25.0),
           ),
           child: BottomAppBar(
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
             color: kColor,
             notchMargin: 0,
             elevation: 0,

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -81,7 +82,9 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
           'requiredDate': _requiredDate,
         });
 
-        Navigator.pop(context);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+          return const BottomBarScreen();
+        }));
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -242,7 +245,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                _weight = value;
+                                _cropType = value;
                               });
                             },
                             // validator: (value) {

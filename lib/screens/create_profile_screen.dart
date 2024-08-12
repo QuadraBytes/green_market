@@ -102,14 +102,14 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         body: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: Image.asset("assets/images/logo.png"),
+              Image.asset(
+                "assets/images/logo.png",
+                width: MediaQuery.of(context).size.height * 0.25,
+                height: MediaQuery.of(context).size.height * 0.25,
               ),
-              //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               const Text(
                 "CREATE PROFILE",
                 style: TextStyle(
@@ -119,9 +119,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-
               Container(
                 width: MediaQuery.of(context).size.width * 0.85,
                 child: Form(

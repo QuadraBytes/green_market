@@ -74,12 +74,12 @@ class _LoginState extends State<Login> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: Image.asset("assets/images/logo.png"),
+              Image.asset(
+                "assets/images/logo.png",
+                width: MediaQuery.of(context).size.height * 0.25,
+                height: MediaQuery.of(context).size.height * 0.25,
               ),
-              //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               const Text(
                 "LOGIN",
                 style: TextStyle(
@@ -89,9 +89,7 @@ class _LoginState extends State<Login> {
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.025),
-
               Container(
                 width: MediaQuery.of(context).size.width * 0.85,
                 child: Form(

@@ -1082,18 +1082,18 @@ class _FarmerScreenState extends State<FarmerScreen> {
                               style: TextStyle(fontSize: 15.0),
                             ),
                     ),
-                    IconButton(
-                      focusNode: searchFocusNode,
-                      icon: Icon(
-                        Icons.filter_alt_outlined,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        showSearchBar = true;
-                        _showFilterSheet(context);
-                        searchFocusNode.requestFocus();
-                      },
-                    ),
+                    !showSearchBar
+                        ? IconButton(
+                            focusNode: searchFocusNode,
+                            icon: Icon(
+                              Icons.filter_alt_outlined,
+                              size: 30,
+                            ),
+                            onPressed: () {
+                              _showFilterSheet(context);
+                            },
+                          )
+                        : Container(),
                     !showSearchBar
                         ? IconButton(
                             onPressed: () {

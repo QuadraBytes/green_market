@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -33,6 +34,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
   final _auth = FirebaseAuth.instance;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
 
   final CollectionReference cropsCollection =
       FirebaseFirestore.instance.collection('crops');
@@ -116,10 +123,13 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'availableDate': _availableDate,
           'expiringDate': _expiringDate,
           'price': _price,
-          'images': _images.map((image) => image.path).toList(),
+          // 'images': _images.map((image) => image.path).toList(),
         });
 
-        Navigator.pop(context);
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
+          return const BottomBarScreen();
+        }));
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Failed to add crop: $error'),
@@ -155,14 +165,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       height: 50,
                     ),
 
-                    TextFormField(
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(labelText: "Farmer's Name"),
-                      onSaved: (value) {
-                        _farmerName = value;
-                      },
-                    ),
-                    SizedBox(height: 15),
+                    // TextFormField(
+                    //   style: TextStyle(fontWeight: FontWeight.w500),
+                    //   decoration: InputDecoration(labelText: "Farmer's Name"),
+                    //   onSaved: (value) {
+                    //     _farmerName = value;
+                    //   },
+                    // ),
+                    // SizedBox(height: 15),
 
                     DropdownButtonFormField<String>(
                       menuMaxHeight: MediaQuery.of(context).size.height * 0.3,

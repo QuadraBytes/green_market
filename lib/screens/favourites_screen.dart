@@ -44,33 +44,68 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         List<String> cropFavouritesIdList =
             List<String>.from(userDoc['cropFavourites'] ?? []);
 
-        for (var id in requireFavouritesIdList) {
-          var data = await FirebaseFirestore.instance
-              .collection('requirements')
-              .doc(id)
-              .get();
+        if (requireFavouritesIdList.isEmpty && cropFavouritesIdList.isEmpty) {
+          setState(() {
+            showLoading = false;
+          });
+          return;
+        } else if (requireFavouritesIdList.isNotEmpty &&
+            cropFavouritesIdList.isEmpty) {
+          for (var id in requireFavouritesIdList) {
+            var data = await FirebaseFirestore.instance
+                .collection('requirements')
+                .doc(id)
+                .get();
 
-          if (data.exists) {
             requireFavouritesList.add(data);
           }
-        }
+          setState(() {
+            requireFavourites = requireFavouritesList;
+            showLoading = false;
+          });
+        } else if (requireFavouritesIdList.isEmpty &&
+            cropFavouritesIdList.isNotEmpty) {
+          for (var id in cropFavouritesIdList) {
+            var data = await FirebaseFirestore.instance
+                .collection('crops')
+                .doc(id)
+                .get();
 
-        for (var id in cropFavouritesIdList) {
-          var data = await FirebaseFirestore.instance
-              .collection('crops')
-              .doc(id)
-              .get();
-
-          if (data.exists) {
-            cropFavouritesList.add(data);
+            if (data.exists) {
+              cropFavouritesList.add(data);
+            }
           }
-        }
+          setState(() {
+            cropFavourites = cropFavouritesList;
+            showLoading = false;
+          });
+        } else {
+          for (var id in requireFavouritesIdList) {
+            var data = await FirebaseFirestore.instance
+                .collection('requirements')
+                .doc(id)
+                .get();
 
-        setState(() {
-          requireFavourites = requireFavouritesList;
-          cropFavourites = cropFavouritesList;
-          showLoading = false;
-        });
+            requireFavouritesList.add(data);
+          }
+
+          for (var id in cropFavouritesIdList) {
+            var data = await FirebaseFirestore.instance
+                .collection('crops')
+                .doc(id)
+                .get();
+
+            if (data.exists) {
+              cropFavouritesList.add(data);
+            }
+          }
+
+          setState(() {
+            requireFavourites = requireFavouritesList;
+            cropFavourites = cropFavouritesList;
+            showLoading = false;
+          });
+        }
       }
     } catch (e) {
       print(e);
