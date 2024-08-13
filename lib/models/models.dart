@@ -38,8 +38,20 @@ const priceRange = [
   "100000"
 ];
 
-const weightRange = ["5", "10", "20", "40", "60", "70", "100"];
+const weightRange = ["< 30", "30-60", "60-90", "90 <"];
 
-const cropTypes = ["Carrot", "Leeks", "Cabbage", "Raddish", "Beetroot", "Potatoes", "Knolkhol", 'Pepper', 'Lettuce', 'Tomato', 'Capsicum'];
+const cropTypes = [
+  "Carrot",
+  "Leeks",
+  "Cabbage",
+  "Raddish",
+  "Beetroot",
+  "Potatoes",
+  "Knolkhol",
+  'Pepper',
+  'Lettuce',
+  'Tomato',
+  'Capsicum'
+];
 
 const groupType = ['Single', 'Group'];

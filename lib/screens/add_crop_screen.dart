@@ -180,12 +180,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     DropdownButtonFormField<String>(
                       menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
                       decoration: InputDecoration(
-                        labelText: 'District',
-                        // suffixIcon: Icon(
-                        //   Icons.keyboard_arrow_down_outlined,
-                        //   size: 30,
-                        // ),
-                      ),
+                          labelText: 'District',
+                          labelStyle: TextStyle(
+                            color: kColor4,
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black))),
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: Icon(
@@ -209,6 +209,11 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     TextFormField(
                       style: TextStyle(fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
+                          labelStyle: TextStyle(
+                            color: kColor4,
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black)),
                           labelText: 'Address',
                           hintText: 'Eg: No, Street, City',
                           hintStyle: TextStyle(
@@ -229,6 +234,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
                           child: TextFormField(
                             decoration: InputDecoration(
                                 labelText: 'Phone Number',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black)),
                                 prefixText: '+94 ',
                                 prefixStyle:
                                     TextStyle(fontWeight: FontWeight.w500),
@@ -245,7 +256,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         SizedBox(width: 20),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(labelText: 'Crop Type'),
+                            decoration: InputDecoration(
+                                labelText: 'Crop Type',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
@@ -274,7 +292,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(labelText: 'Weight'),
+                            decoration: InputDecoration(
+                                labelText: 'Weight',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
@@ -299,8 +324,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         SizedBox(width: 20),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration:
-                                InputDecoration(labelText: 'Single/Group'),
+                            decoration: InputDecoration(
+                                labelText: 'Single/Group',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
@@ -334,6 +365,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
                               child: TextFormField(
                                 decoration: InputDecoration(
                                     labelText: 'Available Date',
+                                    labelStyle: TextStyle(
+                                      color: kColor4,
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black)),
                                     suffixIcon: Icon(Icons.calendar_today)),
                                 controller: TextEditingController(
                                   text: _availableDate == null
@@ -355,6 +392,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
                               child: TextFormField(
                                 decoration: InputDecoration(
                                     labelText: 'Expire Date',
+                                    labelStyle: TextStyle(
+                                      color: kColor4,
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black)),
                                     suffixIcon: Icon(Icons.calendar_today)),
                                 controller: TextEditingController(
                                     text: _expiringDate == null
@@ -373,27 +416,19 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: DropdownButtonFormField<String>(
-                            menuMaxHeight:
-                                MediaQuery.of(context).size.height * 0.3,
-                            icon: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(
-                                Icons.keyboard_arrow_down_outlined,
-                                size: 25,
-                              ),
-                            ),
-                            decoration: InputDecoration(labelText: 'Price'),
-                            items: priceRange.map((String price) {
-                              return DropdownMenuItem<String>(
-                                value: price,
-                                child: Text('Rs. $price'),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _price = value;
-                              });
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                                labelText: 'Price',
+                                prefixText: 'Rs. ',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                            onSaved: (value) {
+                              _price = value;
                             },
                           ),
                         ),
@@ -401,7 +436,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         Expanded(
                           child: TextFormField(
                             decoration: InputDecoration(
-                                labelText: 'Cultivated Area', suffixText: 'ha'),
+                                labelText: 'Cultivated Area',
+                                suffixText: 'ha',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
                             style: TextStyle(fontWeight: FontWeight.w500),
                             onSaved: (value) {
                               _cultivatedArea = value;
@@ -416,6 +458,11 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       child: AbsorbPointer(
                         child: TextFormField(
                           decoration: InputDecoration(
+                              labelStyle: TextStyle(
+                                color: kColor4,
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.black)),
                               labelText: _images.length == 0
                                   ? 'Upload Images (2)'
                                   : _images.length == 1

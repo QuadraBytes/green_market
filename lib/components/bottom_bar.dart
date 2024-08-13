@@ -63,7 +63,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             color: kColor,
             notchMargin: 0,
             elevation: 0,
-            height: 80,
+            height: 70,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -87,7 +87,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
       },
       child: Container(
         padding: EdgeInsets.zero,
-        width: size.width * 0.18,
+        // width: size.width * 0.18,
         child: Column(
           children: [
             Expanded(
@@ -96,26 +96,26 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                 children: [
                   Icon(
                     icon,
-                    size: size.height * 0.035,
+                    size: size.height * 0.03,
                     color: Colors.white,
                   ),
                   Text(
                     label,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: size.height * 0.015,
+                      fontSize: size.height * 0.0125,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(
-              height: 3,
-            ),
+            // SizedBox(
+            //   height: 1,
+            // ),
             if (index == _currentIndex)
               Container(
-                height: 3,
+                height: 2,
                 width: size.width * 0.15,
                 color: Colors.white,
               ),

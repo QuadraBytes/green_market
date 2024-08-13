@@ -117,6 +117,12 @@ class _SigninState extends State<Signin> {
                       TextField(
                         controller: emailController,
                         decoration: InputDecoration(
+                           labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black)),
                           labelText: "Email",
                           hintText: "Enter your Email",
                           prefixIcon: Icon(Icons.email),
