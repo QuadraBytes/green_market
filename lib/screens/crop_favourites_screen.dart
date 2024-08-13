@@ -5,6 +5,7 @@ import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 late User? loggedInUser;
 
@@ -65,6 +66,18 @@ class _CropFavouritesScreenState extends State<CropFavouritesScreen> {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $phoneNumber';
     }
   }
 
@@ -288,7 +301,9 @@ class _CropFavouritesScreenState extends State<CropFavouritesScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             FloatingActionButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _makePhoneCall(data['phoneNumber']);
+                              },
                               child: Icon(
                                 Icons.call,
                                 color: Colors.white,
@@ -621,7 +636,10 @@ class _CropFavouritesScreenState extends State<CropFavouritesScreen> {
                                                                           child:
                                                                               IconButton(
                                                                             onPressed:
-                                                                                () {},
+                                                                                () {
+                                                                                                                  _makePhoneCall(data['phoneNumber']);
+
+                                                                                },
                                                                             icon:
                                                                                 Icon(
                                                                               size: 20,

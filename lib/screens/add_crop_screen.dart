@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
@@ -110,6 +111,17 @@ class _AddCropScreenState extends State<AddCropScreen> {
       }
 
       try {
+        // List imagesUrls = [];
+
+        // for (var image in _images) {
+        //   var imageName = DateTime.now().millisecondsSinceEpoch.toString();
+        //   var storageRef =
+        //       FirebaseStorage.instance.ref().child('$imageName.jpg');
+        //   var uploadTask = storageRef.putFile(image!);
+        //   var downloadUrl = await (await uploadTask).ref.getDownloadURL();
+        //   imagesUrls.add(downloadUrl);
+        // }
+
         await cropsCollection.add({
           'userId': loggedInUser?.uid,
           'farmerName': _farmerName,
@@ -126,7 +138,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'isAccepted': false,
           'isDeleted': false,
           'isExpired': false,
-          // 'images': _images.map((image) => image.path).toList(),
+          // 'images': imagesUrls,
         });
 
         Navigator.pushReplacement(context,
