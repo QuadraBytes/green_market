@@ -23,7 +23,7 @@ class FarmerScreen extends StatefulWidget {
 class _FarmerScreenState extends State<FarmerScreen> {
   TextEditingController searchText = TextEditingController();
   String selectedDistrict = '';
-  List<String> selectedWeightRange = [];
+  String selectedWeightRange = '';
   List<String> selectedPriceRange = [];
   bool isAvailableSelected = false;
   bool isUpcomingSelected = false;
@@ -88,10 +88,33 @@ class _FarmerScreenState extends State<FarmerScreen> {
   }
 
   getAllCrops() async {
-    var list = await FirebaseFirestore.instance.collection('crops').get();
+    var allcroplist = await FirebaseFirestore.instance
+        .collection('crops')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .get();
+
+    for (var doc in allcroplist.docs) {
+      DateTime expiredDate = doc['expiringDate'].toDate();
+      bool isExpired = doc['isExpired'];
+
+      if (DateTime.now().isAfter(expiredDate) && !isExpired) {
+        await FirebaseFirestore.instance
+            .collection('crops')
+            .doc(doc.id)
+            .update({'isExpired': true});
+      }
+    }
+
+    var list = await FirebaseFirestore.instance
+        .collection('crops')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .where('isExpired', isEqualTo: false)
+        .get();
+
     setState(() {
       cropList = list.docs;
-      // searchList = cropList;
       unionCropList = cropList;
     });
   }
@@ -188,9 +211,12 @@ class _FarmerScreenState extends State<FarmerScreen> {
       bool isInclude = true;
 
       if (selectedWeightRange.isNotEmpty) {
-        int cropWeight = int.parse(crop['weight']);
-        if (cropWeight < int.parse(selectedWeightRange[0]) ||
-            cropWeight > int.parse(selectedWeightRange[1])) {
+        // int cropWeight = int.parse(crop['weight']);
+        // if (cropWeight < int.parse(selectedWeightRange[0]) ||
+        //     cropWeight > int.parse(selectedWeightRange[1])) {
+        //   isInclude = false;
+        // }
+        if (selectedWeightRange == crop['weight']) {
           isInclude = false;
         }
       }
@@ -287,7 +313,9 @@ class _FarmerScreenState extends State<FarmerScreen> {
                             Row(
                               children: [
                                 Icon(
-                                  Icons.person,
+                                  data['farmerType'] == 'Single'
+                                      ? Icons.person
+                                      : Icons.people,
                                   color: Colors.black,
                                   size: 20,
                                 ),
@@ -684,108 +712,9 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                 children: List.generate(
                                   weightRange.length,
                                   (index) => ListTile(
-                                    title: index == 0
-                                        ? selectedWeightRange.contains('0') &&
-                                                selectedWeightRange.contains(
-                                                    weightRange[index])
-                                            ? Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.check,
-                                                    color: const Color.fromARGB(
-                                                        255, 0, 110, 57),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                      'Below ${weightRange[index]} kg'),
-                                                ],
-                                              )
-                                            : Text(
-                                                'Below ${weightRange[index]} kg')
-                                        : index == weightRange.length - 1
-                                            ? selectedWeightRange.contains(
-                                                        weightRange[index]) &&
-                                                    selectedWeightRange
-                                                        .contains('1000')
-                                                ? Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.check,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 0, 110, 57),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                          'Above ${weightRange[index]} kg'),
-                                                    ],
-                                                  )
-                                                : Text(
-                                                    'Above ${weightRange[index]} kg')
-                                            : selectedWeightRange.contains(
-                                                        weightRange[index]) &&
-                                                    selectedWeightRange
-                                                        .contains(weightRange[
-                                                            index + 1])
-                                                ? Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.check,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 0, 110, 57),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                          '${weightRange[index]} - ${weightRange[index + 1]} kg'),
-                                                    ],
-                                                  )
-                                                : Text(
-                                                    '${weightRange[index]} - ${weightRange[index + 1]} kg'),
+                                    title: Text('${weightRange[index]} kg'),
                                     onTap: () {
-                                      if (index == 0) {
-                                        if (selectedWeightRange.contains('0') &&
-                                            selectedWeightRange
-                                                .contains(weightRange[index])) {
-                                          selectedWeightRange = [];
-                                        } else {
-                                          selectedWeightRange = [
-                                            '0',
-                                            weightRange[index]
-                                          ];
-                                        }
-                                      } else if (index ==
-                                          weightRange.length - 1) {
-                                        if (selectedWeightRange
-                                                .contains(weightRange[index]) &&
-                                            selectedWeightRange
-                                                .contains('1000')) {
-                                          selectedWeightRange = [];
-                                        } else {
-                                          selectedWeightRange = [
-                                            weightRange[index],
-                                            '1000'
-                                          ];
-                                        }
-                                      } else {
-                                        if (selectedWeightRange
-                                                .contains(weightRange[index]) &&
-                                            selectedWeightRange.contains(
-                                                weightRange[index + 1])) {
-                                          selectedWeightRange = [];
-                                        } else {
-                                          selectedWeightRange = [
-                                            weightRange[index],
-                                            weightRange[index + 1]
-                                          ];
-                                        }
-                                      }
+                                      selectedWeightRange = weightRange[index];
                                       print(selectedWeightRange);
                                       Navigator.pop(context);
                                       _showFilterSheet(context);
@@ -1082,18 +1011,18 @@ class _FarmerScreenState extends State<FarmerScreen> {
                               style: TextStyle(fontSize: 15.0),
                             ),
                     ),
-                    IconButton(
-                      focusNode: searchFocusNode,
-                      icon: Icon(
-                        Icons.filter_alt_outlined,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        showSearchBar = true;
-                        _showFilterSheet(context);
-                        searchFocusNode.requestFocus();
-                      },
-                    ),
+                    !showSearchBar
+                        ? IconButton(
+                            focusNode: searchFocusNode,
+                            icon: Icon(
+                              Icons.filter_alt_outlined,
+                              size: 30,
+                            ),
+                            onPressed: () {
+                              _showFilterSheet(context);
+                            },
+                          )
+                        : Container(),
                     !showSearchBar
                         ? IconButton(
                             onPressed: () {
@@ -1157,11 +1086,10 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                 ),
                               if (selectedWeightRange.isNotEmpty)
                                 Chip(
-                                  label: Text(
-                                      '${selectedWeightRange.first} - ${selectedWeightRange.last} kg'),
+                                  label: Text('$selectedWeightRange kg'),
                                   onDeleted: () {
                                     setState(() {
-                                      selectedWeightRange = [];
+                                      selectedWeightRange = '';
                                       Filter();
                                     });
                                   },
@@ -1218,7 +1146,9 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                 _showCropDetails(data, isFavouriteCrop);
                               },
                               child: Container(
-                                margin: EdgeInsets.only(top: 10),
+                                margin: index == (unionCropList.length - 1)
+                                    ? EdgeInsets.only(top: 10, bottom: 30)
+                                    : EdgeInsets.only(top: 10),
                                 child: Card(
                                   elevation: 5,
                                   shape: RoundedRectangleBorder(
@@ -1274,7 +1204,10 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                                     Row(
                                                       children: [
                                                         Icon(
-                                                          Icons.person,
+                                                          data['farmerType'] ==
+                                                                  'Single'
+                                                              ? Icons.person
+                                                              : Icons.people,
                                                           color: Colors.black,
                                                           size: 17.5,
                                                         ),

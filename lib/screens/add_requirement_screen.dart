@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:green_market/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -79,9 +80,15 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
           'cropType': _cropType,
           'weight': _weight,
           'requiredDate': _requiredDate,
+          'isAccepted': false,
+          'isDeleted': false,
+          'isExpired': false,
         });
 
-        Navigator.pop(context);
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
+          return const BottomBarScreen();
+        }));
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -142,12 +149,12 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                     DropdownButtonFormField<String>(
                       menuMaxHeight: MediaQuery.of(context).size.height * 0.3,
                       decoration: InputDecoration(
-                        labelText: 'District',
-                        // suffixIcon: Icon(
-                        //   Icons.keyboard_arrow_down_outlined,
-                        //   size: 30,
-                        // ),
-                      ),
+                          labelText: 'District',
+                          labelStyle: TextStyle(
+                            color: kColor4,
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black))),
                       icon: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: Icon(
@@ -178,6 +185,11 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                       style: TextStyle(fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                           labelText: 'Address',
+                          labelStyle: TextStyle(
+                            color: kColor4,
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black)),
                           hintText: 'Eg: No, Street, City',
                           hintStyle: TextStyle(
                               color: Colors.grey,
@@ -204,6 +216,12 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                             decoration: InputDecoration(
                                 labelText: 'Phone Number',
                                 prefixText: '+94 ',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black)),
                                 prefixStyle:
                                     TextStyle(fontWeight: FontWeight.w500),
                                 hintStyle: TextStyle(
@@ -225,7 +243,14 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                         SizedBox(width: 20),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(labelText: 'Crop Type'),
+                            decoration: InputDecoration(
+                                labelText: 'Crop Type',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
@@ -233,16 +258,16 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                                 size: 25,
                               ),
                             ),
-                            items: weightRange.map((String weight) {
+                            items: cropTypes.map((String crop) {
                               return DropdownMenuItem<String>(
-                                value: weight,
-                                child: Text('$weight kg',
+                                value: crop,
+                                child: Text('$crop',
                                     style: TextStyle(fontSize: 16)),
                               );
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                _weight = value;
+                                _cropType = value;
                               });
                             },
                             // validator: (value) {
@@ -260,7 +285,14 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(labelText: 'Weight'),
+                            decoration: InputDecoration(
+                                labelText: 'Weight',
+                                labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black))),
                             icon: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
@@ -296,6 +328,12 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                               child: TextFormField(
                                 decoration: InputDecoration(
                                     labelText: 'Required Date',
+                                    labelStyle: TextStyle(
+                                      color: kColor4,
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black)),
                                     suffixIcon: Icon(Icons.calendar_today)),
                                 controller: TextEditingController(
                                     text: _requiredDate == null

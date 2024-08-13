@@ -21,7 +21,7 @@ class BuyerScreen extends StatefulWidget {
 class _BuyerScreenState extends State<BuyerScreen> {
   TextEditingController searchText = TextEditingController();
   String selectedDistrict = '';
-  List<String> selectedWeightRange = [];
+  String selectedWeightRange = '';
   List<String> selectedPriceRange = [];
   bool isAvailableSelected = false;
   bool isUpcomingSelected = false;
@@ -85,11 +85,33 @@ class _BuyerScreenState extends State<BuyerScreen> {
   }
 
   getAllCrops() async {
-    var list =
-        await FirebaseFirestore.instance.collection('requirements').get();
+    var allrequirelist = await FirebaseFirestore.instance
+        .collection('requirements')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .get();
+
+    for (var doc in allrequirelist.docs) {
+      DateTime expiredDate = doc['requiredDate'].toDate();
+      bool isExpired = doc['isExpired'];
+
+      if (DateTime.now().isAfter(expiredDate) && !isExpired) {
+        await FirebaseFirestore.instance
+            .collection('requirements')
+            .doc(doc.id)
+            .update({'isExpired': true});
+      }
+    }
+
+    var list = await FirebaseFirestore.instance
+        .collection('requirements')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .where('isExpired', isEqualTo: false)
+        .get();
+
     setState(() {
       requireList = list.docs;
-      searchList = requireList;
       unionRequireList = requireList;
     });
   }
@@ -180,9 +202,12 @@ class _BuyerScreenState extends State<BuyerScreen> {
       bool isInclude = true;
 
       if (selectedWeightRange.isNotEmpty) {
-        int cropWeight = int.parse(crop['weight']);
-        if (cropWeight < int.parse(selectedWeightRange[0]) ||
-            cropWeight > int.parse(selectedWeightRange[1])) {
+        // int cropWeight = int.parse(crop['weight']);
+        // if (cropWeight < int.parse(selectedWeightRange[0]) ||
+        //     cropWeight > int.parse(selectedWeightRange[1])) {
+        //   isInclude = false;
+        // }
+        if (selectedWeightRange == crop['weight']) {
           isInclude = false;
         }
       }
@@ -420,108 +445,9 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                 children: List.generate(
                                   weightRange.length,
                                   (index) => ListTile(
-                                    title: index == 0
-                                        ? selectedWeightRange.contains('0') &&
-                                                selectedWeightRange.contains(
-                                                    weightRange[index])
-                                            ? Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.check,
-                                                    color: const Color.fromARGB(
-                                                        255, 0, 110, 57),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                      'Below ${weightRange[index]} kg'),
-                                                ],
-                                              )
-                                            : Text(
-                                                'Below ${weightRange[index]} kg')
-                                        : index == weightRange.length - 1
-                                            ? selectedWeightRange.contains(
-                                                        weightRange[index]) &&
-                                                    selectedWeightRange
-                                                        .contains('1000')
-                                                ? Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.check,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 0, 110, 57),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                          'Above ${weightRange[index]} kg'),
-                                                    ],
-                                                  )
-                                                : Text(
-                                                    'Above ${weightRange[index]} kg')
-                                            : selectedWeightRange.contains(
-                                                        weightRange[index]) &&
-                                                    selectedWeightRange
-                                                        .contains(weightRange[
-                                                            index + 1])
-                                                ? Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.check,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 0, 110, 57),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                          '${weightRange[index]} - ${weightRange[index + 1]} kg'),
-                                                    ],
-                                                  )
-                                                : Text(
-                                                    '${weightRange[index]} - ${weightRange[index + 1]} kg'),
+                                    title: Text('${weightRange[index]} kg'),
                                     onTap: () {
-                                      if (index == 0) {
-                                        if (selectedWeightRange.contains('0') &&
-                                            selectedWeightRange
-                                                .contains(weightRange[index])) {
-                                          selectedWeightRange = [];
-                                        } else {
-                                          selectedWeightRange = [
-                                            '0',
-                                            weightRange[index]
-                                          ];
-                                        }
-                                      } else if (index ==
-                                          weightRange.length - 1) {
-                                        if (selectedWeightRange
-                                                .contains(weightRange[index]) &&
-                                            selectedWeightRange
-                                                .contains('1000')) {
-                                          selectedWeightRange = [];
-                                        } else {
-                                          selectedWeightRange = [
-                                            weightRange[index],
-                                            '1000'
-                                          ];
-                                        }
-                                      } else {
-                                        if (selectedWeightRange
-                                                .contains(weightRange[index]) &&
-                                            selectedWeightRange.contains(
-                                                weightRange[index + 1])) {
-                                          selectedWeightRange = [];
-                                        } else {
-                                          selectedWeightRange = [
-                                            weightRange[index],
-                                            weightRange[index + 1]
-                                          ];
-                                        }
-                                      }
+                                      selectedWeightRange = weightRange[index];
                                       print(selectedWeightRange);
                                       Navigator.pop(context);
                                       _showFilterSheet(context);
@@ -679,15 +605,17 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                 style: TextStyle(fontSize: 15.0),
                               ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.filter_alt_outlined,
-                          size: 30,
-                        ),
-                        onPressed: () {
-                          _showFilterSheet(context);
-                        },
-                      ),
+                      !showSearchBar
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.filter_alt_outlined,
+                                size: 30,
+                              ),
+                              onPressed: () {
+                                _showFilterSheet(context);
+                              },
+                            )
+                          : Container(),
                       !showSearchBar
                           ? IconButton(
                               onPressed: () {
@@ -751,11 +679,10 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                   ),
                                 if (selectedWeightRange.isNotEmpty)
                                   Chip(
-                                    label: Text(
-                                        '${selectedWeightRange.first} - ${selectedWeightRange.last} kg'),
+                                    label: Text('$selectedWeightRange kg'),
                                     onDeleted: () {
                                       setState(() {
-                                        selectedWeightRange = [];
+                                        selectedWeightRange = '';
                                         Filter();
                                       });
                                     },

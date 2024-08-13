@@ -16,9 +16,9 @@ class SocialMedia extends StatelessWidget {
         body: Stack(
           children: [
             Positioned(
-                top: -50, child: Image.asset('assets/images/appbar2.png')),
+                top: -40, child: Image.asset('assets/images/appbar2.png')),
             Positioned(
-              top: 20,
+              top: 15,
               left: 10,
               child: Builder(
                 builder: (context) {

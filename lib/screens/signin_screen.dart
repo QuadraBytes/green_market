@@ -93,12 +93,12 @@ class _SigninState extends State<Signin> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: Image.asset("assets/images/logo.png"),
+              Image.asset(
+                "assets/images/logo.png",
+                width: MediaQuery.of(context).size.height * 0.2,
+                height: MediaQuery.of(context).size.height * 0.2,
               ),
-              //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               const Text(
                 "REGISTER NOW",
                 style: TextStyle(
@@ -108,9 +108,7 @@ class _SigninState extends State<Signin> {
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-
               Container(
                 width: MediaQuery.of(context).size.width * 0.85,
                 child: Form(
@@ -119,6 +117,12 @@ class _SigninState extends State<Signin> {
                       TextField(
                         controller: emailController,
                         decoration: InputDecoration(
+                           labelStyle: TextStyle(
+                                  color: kColor4,
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.black)),
                           labelText: "Email",
                           hintText: "Enter your Email",
                           prefixIcon: Icon(Icons.email),

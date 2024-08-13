@@ -19,9 +19,9 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         body: Stack(
           children: [
             Positioned(
-                top: -50, child: Image.asset('assets/images/appbar2.png')),
+                top: -40, child: Image.asset('assets/images/appbar2.png')),
             Positioned(
-              top: 20,
+              top: 15,
               left: 10,
               child: Builder(
                 builder: (context) {
@@ -49,7 +49,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
                       color: Colors.white)),
             ),
             Positioned(
-              top: 100,
+              top: 120,
               left: 0,
               right: 0,
               child: Column(

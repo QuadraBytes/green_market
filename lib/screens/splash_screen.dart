@@ -31,10 +31,10 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.45,
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: Image.asset("assets/images/splash_logo.png"),
+              child: Image.asset(
+                "assets/images/logo1.png",
+                width: MediaQuery.of(context).size.height * 0.4,
+                height: MediaQuery.of(context).size.height * 0.4,
               ),
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.1),

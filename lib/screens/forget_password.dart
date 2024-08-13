@@ -128,12 +128,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: Image.asset("assets/images/logo.png"),
+              Image.asset(
+                "assets/images/logo.png",
+                width: MediaQuery.of(context).size.height * 0.2,
+                height: MediaQuery.of(context).size.height * 0.2,
               ),
-              //   SizedBox(height: MediaQuery.of(context).size.height * 0.000001),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               const Text(
                 "VERIFY EMAIL",
                 style: TextStyle(
@@ -143,7 +143,6 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
-      
               SizedBox(height: MediaQuery.of(context).size.height * 0.025),
               TextField(
                 controller: emailController,
@@ -157,7 +156,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              showOtp ? const Text('Didn\'t receive the otp code?') : Container(),
+              showOtp
+                  ? const Text('Didn\'t receive the otp code?')
+                  : Container(),
               showOtp ? const SizedBox(height: 10) : Container(),
               showSendProgress
                   ? const CircularProgressIndicator(
@@ -199,12 +200,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold)),
                         ),
-      
               const SizedBox(height: 50),
               showOtp
                   ? const Text(
                       'Verification Code',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                     )
                   : Container(),
               showOtp ? const SizedBox(height: 20) : Container(),
@@ -254,7 +255,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       },
                       child: Text("Verify Email",
                           style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold)),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                     )
                   : Container(),
               showOtp ? const SizedBox(height: 10) : Container(),
