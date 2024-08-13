@@ -80,9 +80,13 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
           'cropType': _cropType,
           'weight': _weight,
           'requiredDate': _requiredDate,
+          'isAccepted': false,
+          'isDeleted': false,
+          'isExpired': false,
         });
 
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
           return const BottomBarScreen();
         }));
       } catch (e) {
@@ -236,10 +240,10 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                                 size: 25,
                               ),
                             ),
-                            items: weightRange.map((String weight) {
+                            items: cropTypes.map((String crop) {
                               return DropdownMenuItem<String>(
-                                value: weight,
-                                child: Text('$weight kg',
+                                value: crop,
+                                child: Text('$crop',
                                     style: TextStyle(fontSize: 16)),
                               );
                             }).toList(),

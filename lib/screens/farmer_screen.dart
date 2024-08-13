@@ -88,10 +88,33 @@ class _FarmerScreenState extends State<FarmerScreen> {
   }
 
   getAllCrops() async {
-    var list = await FirebaseFirestore.instance.collection('crops').get();
+    var allcroplist = await FirebaseFirestore.instance
+        .collection('crops')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .get();
+
+    for (var doc in allcroplist.docs) {
+      DateTime expiredDate = doc['expiringDate'].toDate();
+      bool isExpired = doc['isExpired'];
+
+      if (DateTime.now().isAfter(expiredDate) && !isExpired) {
+        await FirebaseFirestore.instance
+            .collection('crops')
+            .doc(doc.id)
+            .update({'isExpired': true});
+      }
+    }
+
+    var list = await FirebaseFirestore.instance
+        .collection('crops')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .where('isExpired', isEqualTo: false)
+        .get();
+
     setState(() {
       cropList = list.docs;
-      // searchList = cropList;
       unionCropList = cropList;
     });
   }
@@ -1218,7 +1241,9 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                 _showCropDetails(data, isFavouriteCrop);
                               },
                               child: Container(
-                                margin: EdgeInsets.only(top: 10),
+                                margin: index == (unionCropList.length - 1)
+                                    ? EdgeInsets.only(top: 10, bottom: 30)
+                                    : EdgeInsets.only(top: 10),
                                 child: Card(
                                   elevation: 5,
                                   shape: RoundedRectangleBorder(

@@ -123,6 +123,9 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'availableDate': _availableDate,
           'expiringDate': _expiringDate,
           'price': _price,
+          'isAccepted': false,
+          'isDeleted': false,
+          'isExpired': false,
           // 'images': _images.map((image) => image.path).toList(),
         });
 
@@ -250,10 +253,10 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 size: 25,
                               ),
                             ),
-                            items: weightRange.map((String weight) {
+                            items: cropTypes.map((String crop) {
                               return DropdownMenuItem<String>(
-                                value: weight,
-                                child: Text('$weight kg',
+                                value: crop,
+                                child: Text('$crop',
                                     style: TextStyle(fontSize: 16)),
                               );
                             }).toList(),

@@ -85,11 +85,33 @@ class _BuyerScreenState extends State<BuyerScreen> {
   }
 
   getAllCrops() async {
-    var list =
-        await FirebaseFirestore.instance.collection('requirements').get();
+    var allrequirelist = await FirebaseFirestore.instance
+        .collection('requirements')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .get();
+
+    for (var doc in allrequirelist.docs) {
+      DateTime expiredDate = doc['requiredDate'].toDate();
+      bool isExpired = doc['isExpired'];
+
+      if (DateTime.now().isAfter(expiredDate) && !isExpired) {
+        await FirebaseFirestore.instance
+            .collection('requirements')
+            .doc(doc.id)
+            .update({'isExpired': true});
+      }
+    }
+
+    var list = await FirebaseFirestore.instance
+        .collection('requirements')
+        .where('isAccepted', isEqualTo: false)
+        .where('isDeleted', isEqualTo: false)
+        .where('isExpired', isEqualTo: false)
+        .get();
+
     setState(() {
       requireList = list.docs;
-      searchList = requireList;
       unionRequireList = requireList;
     });
   }
@@ -679,16 +701,17 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                 style: TextStyle(fontSize: 15.0),
                               ),
                       ),
-                        !showSearchBar
-                        ?  IconButton(
-                        icon: Icon(
-                          Icons.filter_alt_outlined,
-                          size: 30,
-                        ),
-                        onPressed: () {
-                          _showFilterSheet(context);
-                        },
-                      ) : Container(),
+                      !showSearchBar
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.filter_alt_outlined,
+                                size: 30,
+                              ),
+                              onPressed: () {
+                                _showFilterSheet(context);
+                              },
+                            )
+                          : Container(),
                       !showSearchBar
                           ? IconButton(
                               onPressed: () {
