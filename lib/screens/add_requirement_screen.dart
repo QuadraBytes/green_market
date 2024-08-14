@@ -108,12 +108,12 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
-            Positioned(
-                top: -50, child: Image.asset('assets/images/appbar2.png')),
             Container(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: Form(
@@ -121,16 +121,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                 child: ListView(
                   children: [
                     SizedBox(
-                      height: 25,
-                    ),
-                    Text('Add Requirement',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white)),
-                    SizedBox(
-                      height: 50,
+                      height: 100,
                     ),
                     // TextFormField(
                     //   style: TextStyle(fontWeight: FontWeight.w500),
@@ -152,6 +143,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                           labelText: 'District',
                           labelStyle: TextStyle(
                             color: kColor4,
+                            fontSize: size.height * 0.02,
                           ),
                           focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.black))),
@@ -159,7 +151,8 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                         padding: const EdgeInsets.only(right: 8.0),
                         child: Icon(
                           Icons.keyboard_arrow_down_outlined,
-                          size: 25,
+                          size: size.height * 0.035,
+                          color: kColor4,
                         ),
                       ),
                       items: districts.map((String district) {
@@ -180,13 +173,14 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                       //   return null;
                       // },
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     TextFormField(
                       style: TextStyle(fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                           labelText: 'Address',
                           labelStyle: TextStyle(
                             color: kColor4,
+                            fontSize: size.height * 0.02,
                           ),
                           focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.black)),
@@ -196,7 +190,8 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                               fontWeight: FontWeight.normal),
                           suffixIcon: Icon(
                             Icons.location_on,
-                            size: 20,
+                            size: size.height * 0.025,
+                            color: kColor4,
                           )),
                       // validator: (value) {
                       //   if (value == null || value.isEmpty) {
@@ -208,7 +203,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                         _address = value;
                       },
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       children: [
                         Expanded(
@@ -216,8 +211,14 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                             decoration: InputDecoration(
                                 labelText: 'Phone Number',
                                 prefixText: '+94 ',
+                                suffixIcon: Icon(
+                                  Icons.phone,
+                                  size: size.height * 0.025,
+                                  color: kColor4,
+                                ),
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -240,12 +241,13 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                             },
                           ),
                         ),
-                        SizedBox(width: 20),
+                        SizedBox(width: size.width * 0.04),
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             decoration: InputDecoration(
                                 labelText: 'Crop Type',
                                 labelStyle: TextStyle(
+                                  fontSize: size.height * 0.02,
                                   color: kColor4,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
@@ -255,7 +257,8 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
                                 Icons.keyboard_arrow_down_outlined,
-                                size: 25,
+                                size: size.height * 0.025,
+                                color: kColor4,
                               ),
                             ),
                             items: cropTypes.map((String crop) {
@@ -280,7 +283,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       children: [
                         Expanded(
@@ -289,6 +292,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                                 labelText: 'Weight',
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -297,7 +301,8 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
                                 Icons.keyboard_arrow_down_outlined,
-                                size: 25,
+                                size: size.height * 0.025,
+                                color: kColor4,
                               ),
                             ),
                             items: weightRange.map((String weight) {
@@ -320,7 +325,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                             // },
                           ),
                         ),
-                        SizedBox(width: 20),
+                        SizedBox(width: size.width * 0.04),
                         Expanded(
                           child: GestureDetector(
                             onTap: () => _selectDate(context),
@@ -330,11 +335,16 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                                     labelText: 'Required Date',
                                     labelStyle: TextStyle(
                                       color: kColor4,
+                                      fontSize: size.height * 0.02,
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                         borderSide:
                                             BorderSide(color: Colors.black)),
-                                    suffixIcon: Icon(Icons.calendar_today)),
+                                    suffixIcon: Icon(
+                                      Icons.calendar_today,
+                                      size: size.height * 0.025,
+                                      color: kColor4,
+                                    )),
                                 controller: TextEditingController(
                                     text: _requiredDate == null
                                         ? ''
@@ -354,7 +364,7 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 30),
+                    SizedBox(height: size.height * 0.04),
                     Column(
                       children: [
                         ElevatedButton(
@@ -370,14 +380,14 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                                   Color.fromARGB(255, 168, 165, 165)),
                         ),
                         SizedBox(
-                          height: 10,
+                          height: size.height * 0.02,
                         ),
                         ElevatedButton(
                           onPressed: () {
                             _submitForm();
                           },
                           child: Text(
-                            'Submit',
+                            'Post',
                             style: TextStyle(color: Colors.white, fontSize: 15),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -389,6 +399,18 @@ class _AddRequirementScreenState extends State<AddRequirementScreen> {
                   ],
                 ),
               ),
+            ),
+            Positioned(
+                top: -50, child: Image.asset('assets/images/appbar2.png')),
+            Positioned(
+              top: 25,
+              left: size.width * 0.2,
+              right: size.width * 0.2,
+              child: Text('Add Requiremenets',
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white)),
             ),
             Positioned(
                 top: 20,
