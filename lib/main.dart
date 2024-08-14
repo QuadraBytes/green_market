@@ -60,7 +60,7 @@ class GreenMarket extends StatelessWidget {
       //   colorScheme: ColorScheme.fromSeed(seedColor: kColor),
       //   useMaterial3: true,
       // ),
-      home: BottomBarScreen(),
+      home: Login(),
     );
   }
 }
