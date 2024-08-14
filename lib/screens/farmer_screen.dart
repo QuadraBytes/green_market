@@ -10,6 +10,8 @@ import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 late User? loggedInUser;
 
@@ -38,6 +40,9 @@ class _FarmerScreenState extends State<FarmerScreen> {
   late List filterList = [];
   late List unionCropList = [];
   List<String> cropFavourites = [];
+
+  var isListening = false;
+  SpeechToText speech = SpeechToText();
 
   final _auth = FirebaseAuth.instance;
   bool showLoading = false;
@@ -157,6 +162,18 @@ class _FarmerScreenState extends State<FarmerScreen> {
     return cropFavourites.contains(cropId);
   }
 
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $phoneNumber';
+    }
+  }
+
   updateUnionList() {
     setState(() {
       if (searchText.text.isEmpty &&
@@ -261,7 +278,7 @@ class _FarmerScreenState extends State<FarmerScreen> {
     return DateFormat('yyyy-MM-dd').format(dateTime);
   }
 
-  void _showCropDetails(var data, bool isFavourite) {
+  void _showCropDetails(var data, var images, bool isFavourite) {
     Timestamp availableDateTimestamp = data['availableDate'];
     Timestamp expireDateTimestamp = data['expiringDate'];
 
@@ -459,7 +476,9 @@ class _FarmerScreenState extends State<FarmerScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             FloatingActionButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _makePhoneCall(data['phoneNumber']);
+                              },
                               child: Icon(
                                 Icons.call,
                                 color: Colors.white,
@@ -899,6 +918,8 @@ class _FarmerScreenState extends State<FarmerScreen> {
     );
   }
 
+  Color iColor = Colors.black;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -989,10 +1010,44 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                   Icons.search,
                                   color: Colors.black,
                                 ),
-                                suffixIcon: IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
+                                suffixIcon: GestureDetector(
+                                  onTap: () async {
+                                    if (!isListening) {
+                                      bool available = await speech.initialize(
+                                        onStatus: (status) {
+                                          print('status: $status');
+                                        },
+                                        onError: (errorNotification) {
+                                          print('error: $errorNotification');
+                                        },
+                                      );
+                                      if (available) {
+                                        setState(() {
+                                          isListening = true;
+                                          iColor = kColor;
+                                        });
+
+                                        speech.listen(
+                                          onResult: (result) {
+                                            setState(() {
+                                              searchText.text =
+                                                  result.recognizedWords;
+                                              searchFilter(
+                                                  searchText.text.toString());
+                                            });
+                                          },
+                                        );
+                                      }
+                                    } else {
+                                      setState(() {
+                                        isListening = false;
+                                      });
+                                      speech.stop();
+                                    }
+                                  },
+                                  child: Icon(
                                     Icons.mic_outlined,
+                                    color: iColor,
                                   ),
                                 ),
                                 hintText: 'Search Crop',
@@ -1140,10 +1195,14 @@ class _FarmerScreenState extends State<FarmerScreen> {
                           itemBuilder: (context, index) {
                             var data = unionCropList[index];
                             bool isFavouriteCrop = isFavourite(data.id);
+                            var images = [
+                              "assets/images/crop.jpg",
+                              "assets/images/crop2.jpg"
+                            ];
 
                             return GestureDetector(
                               onTap: () {
-                                _showCropDetails(data, isFavouriteCrop);
+                                _showCropDetails(data, images, isFavouriteCrop);
                               },
                               child: Container(
                                 margin: index == (unionCropList.length - 1)
@@ -1175,8 +1234,8 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                                     width: size.width * 0.3,
                                                     height: size.height * 0.125,
                                                     fit: BoxFit.cover,
-                                                    image: AssetImage(
-                                                        "assets/images/crop.jpg"),
+                                                    image:
+                                                        AssetImage(images[0]),
                                                   ),
                                                 ),
                                                 SizedBox(
@@ -1363,7 +1422,11 @@ class _FarmerScreenState extends State<FarmerScreen> {
                                                                   child:
                                                                       IconButton(
                                                                     onPressed:
-                                                                        () {},
+                                                                        () {
+                                                                      _makePhoneCall(
+                                                                          data[
+                                                                              'phoneNumber']);
+                                                                    },
                                                                     icon: Icon(
                                                                       size: 17,
                                                                       Icons

@@ -5,6 +5,7 @@ import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 late User? loggedInUser;
 
@@ -25,6 +26,18 @@ class _RequireFavouritesScreenState extends State<RequireFavouritesScreen> {
     if (user != null) {
       loggedInUser = user;
       await getUserFavourites();
+    }
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $phoneNumber';
     }
   }
 
@@ -397,7 +410,10 @@ class _RequireFavouritesScreenState extends State<RequireFavouritesScreen> {
                                                                   child:
                                                                       IconButton(
                                                                     onPressed:
-                                                                        () {},
+                                                                        () {
+                                                                      _makePhoneCall(
+                                                                          data['phoneNumber']);
+                                                                        },
                                                                     icon: Icon(
                                                                       size: 20,
                                                                       Icons

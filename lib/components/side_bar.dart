@@ -9,8 +9,9 @@ class SideBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.6,
+      width: size.width * 0.6,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -22,7 +23,7 @@ class SideBar extends StatelessWidget {
               child: Image.asset(
                 "assets/images/logo.png",
                 fit: BoxFit.contain,
-                width: 50,
+                width: size.width * 0.4,
               ),
             ),
           ),

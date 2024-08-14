@@ -63,7 +63,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             color: kColor,
             notchMargin: 0,
             elevation: 0,
-            height: 70,
+            height: size.height * 0.08,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [

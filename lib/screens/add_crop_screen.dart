@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:green_market/components/bottom_bar.dart';
 import 'package:green_market/components/constants.dart';
@@ -110,6 +111,17 @@ class _AddCropScreenState extends State<AddCropScreen> {
       }
 
       try {
+        // List imagesUrls = [];
+
+        // for (var image in _images) {
+        //   var imageName = DateTime.now().millisecondsSinceEpoch.toString();
+        //   var storageRef =
+        //       FirebaseStorage.instance.ref().child('$imageName.jpg');
+        //   var uploadTask = storageRef.putFile(image!);
+        //   var downloadUrl = await (await uploadTask).ref.getDownloadURL();
+        //   imagesUrls.add(downloadUrl);
+        // }
+
         await cropsCollection.add({
           'userId': loggedInUser?.uid,
           'farmerName': _farmerName,
@@ -126,7 +138,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
           'isAccepted': false,
           'isDeleted': false,
           'isExpired': false,
-          // 'images': _images.map((image) => image.path).toList(),
+          // 'images': imagesUrls,
         });
 
         Navigator.pushReplacement(context,
@@ -143,12 +155,11 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
-            Positioned(
-                top: -50, child: Image.asset('assets/images/appbar2.png')),
             Container(
               padding: const EdgeInsets.only(left: 20.0, right: 20),
               child: Form(
@@ -156,16 +167,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 child: ListView(
                   children: [
                     SizedBox(
-                      height: 25,
-                    ),
-                    Text('Add Crop',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white)),
-                    SizedBox(
-                      height: 50,
+                      height: 100,
                     ),
 
                     // TextFormField(
@@ -183,6 +185,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                           labelText: 'District',
                           labelStyle: TextStyle(
                             color: kColor4,
+                            fontSize: size.height * 0.02,
                           ),
                           focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.black))),
@@ -190,7 +193,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         padding: const EdgeInsets.only(right: 8.0),
                         child: Icon(
                           Icons.keyboard_arrow_down_outlined,
-                          size: 25,
+                          size: size.height * 0.035,
+                          color: kColor4,
                         ),
                       ),
                       items: districts.map((String district) {
@@ -205,12 +209,13 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         });
                       },
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     TextFormField(
                       style: TextStyle(fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                           labelStyle: TextStyle(
                             color: kColor4,
+                            fontSize: size.height * 0.02,
                           ),
                           focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.black)),
@@ -221,21 +226,28 @@ class _AddCropScreenState extends State<AddCropScreen> {
                               fontWeight: FontWeight.normal),
                           suffixIcon: Icon(
                             Icons.location_on,
-                            size: 20,
+                            size: size.height * 0.025,
+                            color: kColor4,
                           )),
                       onSaved: (value) {
                         _address = value;
                       },
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       children: [
                         Expanded(
                           child: TextFormField(
                             decoration: InputDecoration(
                                 labelText: 'Phone Number',
+                                suffixIcon: Icon(
+                                  Icons.phone,
+                                  size: size.height * 0.025,
+                                  color: kColor4,
+                                ),
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -253,12 +265,13 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             },
                           ),
                         ),
-                        SizedBox(width: 20),
+                        SizedBox(width: size.width * 0.04),
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             decoration: InputDecoration(
                                 labelText: 'Crop Type',
                                 labelStyle: TextStyle(
+                                  fontSize: size.height * 0.02,
                                   color: kColor4,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
@@ -268,7 +281,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
                                 Icons.keyboard_arrow_down_outlined,
-                                size: 25,
+                                size: size.height * 0.025,
+                                color: kColor4,
                               ),
                             ),
                             items: cropTypes.map((String crop) {
@@ -287,7 +301,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       children: [
                         Expanded(
@@ -296,6 +310,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 labelText: 'Weight',
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -304,7 +319,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
                                 Icons.keyboard_arrow_down_outlined,
-                                size: 25,
+                                size: size.height * 0.025,
+                                color: kColor4,
                               ),
                             ),
                             items: weightRange.map((String weight) {
@@ -321,13 +337,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             },
                           ),
                         ),
-                        SizedBox(width: 20),
+                        SizedBox(width: size.width * 0.04),
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             decoration: InputDecoration(
                                 labelText: 'Single/Group',
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -336,7 +353,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Icon(
                                 Icons.keyboard_arrow_down_outlined,
-                                size: 25,
+                                size: size.height * 0.025,
+                                color: kColor4,
                               ),
                             ),
                             items: groupType.map((String type) {
@@ -355,7 +373,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       children: [
                         Expanded(
@@ -367,11 +385,16 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                     labelText: 'Available Date',
                                     labelStyle: TextStyle(
                                       color: kColor4,
+                                      fontSize: size.height * 0.02,
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                         borderSide:
                                             BorderSide(color: Colors.black)),
-                                    suffixIcon: Icon(Icons.calendar_today)),
+                                    suffixIcon: Icon(
+                                      Icons.calendar_today,
+                                      size: size.height * 0.025,
+                                      color: kColor4,
+                                    )),
                                 controller: TextEditingController(
                                   text: _availableDate == null
                                       ? ''
@@ -384,21 +407,26 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 20),
+                        SizedBox(width: size.width * 0.04),
                         Expanded(
                           child: GestureDetector(
                             onTap: () => _selectDate(context, false),
                             child: AbsorbPointer(
                               child: TextFormField(
                                 decoration: InputDecoration(
-                                    labelText: 'Expire Date',
+                                    labelText: 'Expiring Date',
                                     labelStyle: TextStyle(
                                       color: kColor4,
+                                      fontSize: size.height * 0.02,
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                         borderSide:
                                             BorderSide(color: Colors.black)),
-                                    suffixIcon: Icon(Icons.calendar_today)),
+                                    suffixIcon: Icon(
+                                      Icons.calendar_today,
+                                      size: size.height * 0.025,
+                                      color: kColor4,
+                                    )),
                                 controller: TextEditingController(
                                     text: _expiringDate == null
                                         ? ''
@@ -412,7 +440,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Row(
                       children: [
                         Expanded(
@@ -422,6 +450,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 prefixText: 'Rs. ',
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -432,7 +461,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                             },
                           ),
                         ),
-                        SizedBox(width: 20),
+                        SizedBox(width: size.width * 0.04),
                         Expanded(
                           child: TextFormField(
                             decoration: InputDecoration(
@@ -440,6 +469,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                 suffixText: 'ha',
                                 labelStyle: TextStyle(
                                   color: kColor4,
+                                  fontSize: size.height * 0.02,
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
@@ -452,7 +482,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     GestureDetector(
                       onTap: _images.length == 2 ? null : _pickImage,
                       child: AbsorbPointer(
@@ -460,6 +490,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                           decoration: InputDecoration(
                               labelStyle: TextStyle(
                                 color: kColor4,
+                                fontSize: size.height * 0.02,
                               ),
                               focusedBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.black)),
@@ -468,7 +499,11 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                   : _images.length == 1
                                       ? 'One Image is Uploaded'
                                       : 'Two Images are Uploaded',
-                              suffixIcon: Icon(Icons.add_a_photo)),
+                              suffixIcon: Icon(
+                                Icons.add_a_photo,
+                                size: size.height * 0.025,
+                                color: kColor4,
+                              )),
                           style: TextStyle(fontWeight: FontWeight.w500),
                           // validator: (_) {
                           //   if (_images.isEmpty) {
@@ -479,7 +514,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: size.height * 0.02),
                     Wrap(
                       alignment: WrapAlignment.center,
                       spacing: 10,
@@ -499,7 +534,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                         );
                       }).toList(),
                     ),
-                    SizedBox(height: 30),
+                    SizedBox(height: size.height * 0.03),
                     Column(
                       children: [
                         ElevatedButton(
@@ -515,12 +550,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
                                   Color.fromARGB(255, 168, 165, 165)),
                         ),
                         SizedBox(
-                          height: 10,
+                          height: size.height * 0.02,
                         ),
                         ElevatedButton(
                           onPressed: _submitForm,
                           child: Text(
-                            'Submit',
+                            'Post',
                             style: TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -532,6 +567,18 @@ class _AddCropScreenState extends State<AddCropScreen> {
                   ],
                 ),
               ),
+            ),
+            Positioned(
+                top: -50, child: Image.asset('assets/images/appbar2.png')),
+            Positioned(
+              top: 25,
+              left: size.width * 0.35,
+              right: size.width * 0.3,
+              child: Text('Add Crop',
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white)),
             ),
             Positioned(
                 top: 20,

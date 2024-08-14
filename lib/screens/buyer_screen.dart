@@ -8,6 +8,7 @@ import 'package:green_market/screens/add_requirement_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/profile_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 late User? loggedInUser;
 
@@ -491,6 +492,18 @@ class _BuyerScreenState extends State<BuyerScreen> {
     );
   }
 
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $phoneNumber';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -965,7 +978,10 @@ class _BuyerScreenState extends State<BuyerScreen> {
                                                                 EdgeInsets.zero,
                                                             color: kColor,
                                                             child: IconButton(
-                                                              onPressed: () {},
+                                                              onPressed: () {
+                                                                _makePhoneCall(data[
+                                                                    'phoneNumber']);
+                                                              },
                                                               icon: Icon(
                                                                 size: 17,
                                                                 Icons.call,
