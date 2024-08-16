@@ -26,13 +26,24 @@ void openFacebook() async {
 }
 
 void openYouTube() async {
-  final Uri youtubeUrl = Uri.parse('vnd.youtube://www.youtube.com/channel/@Olympics');
-  final Uri fallbackUrl = Uri.parse('https://www.youtube.com/@Olympics');
+  final Uri youtubeUrl = Uri.parse('vnd.youtube://www.youtube.com/channel/@GreenMarket-fv');
+  final Uri fallbackUrl = Uri.parse('https://www.youtube.com/@GreenMarket-fv');
 
   if (await canLaunchUrl(youtubeUrl)) {
     await launchUrl(youtubeUrl);
   } else {
     await launchUrl(fallbackUrl);
+  }
+}
+
+void openLinkedIn() async {
+  final Uri linkedInUrl = Uri.parse('linkedin://linkedin.com/company/green-market-fv');
+  final Uri fallbackUrlLinkedIn = Uri.parse('https://www.linkedin.com/company/green-market-fv');
+
+  if (await canLaunchUrl(linkedInUrl)) {
+    await launchUrl(linkedInUrl);
+  } else {
+    await launchUrl(fallbackUrlLinkedIn);
   }
 }
 
@@ -119,6 +130,16 @@ class MediaCard extends StatelessWidget {
             onTap: openInstagram,
             isInstagram: true,
           ),
+          
+           SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+          MediaCardWidget(
+            color: const Color.fromARGB(255, 0, 119, 181),
+            icon: CommunityMaterialIcons.linkedin,
+            imageAsset: 'assets/images/linkedin.png',
+            onTap: openLinkedIn,
+          ),
+          
+
         ],
       ),
     );

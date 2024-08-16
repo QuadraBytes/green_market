@@ -90,7 +90,7 @@ flutter:
     - assets/images/appbar1.png
     - assets/images/appbar2.png
     - assets/images/profile.png
-    # - assets/images/logo3.png
+    - assets/images/linkedin.png
     - assets/images/farmer.jpg
     - assets/images/facebook.png
     - assets/images/instagram.png

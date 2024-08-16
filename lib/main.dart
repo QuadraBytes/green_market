@@ -12,6 +12,7 @@ import 'package:green_market/screens/create_profile_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/forget_password.dart';
 import 'package:green_market/screens/profile_screen.dart';
+import 'package:green_market/screens/social_media_screen.dart';
 import 'package:green_market/screens/splash_screen.dart';
 import 'package:green_market/screens/login_screen.dart';
 import 'package:green_market/screens/signin_screen.dart';
@@ -60,7 +61,7 @@ class GreenMarket extends StatelessWidget {
       //   colorScheme: ColorScheme.fromSeed(seedColor: kColor),
       //   useMaterial3: true,
       // ),
-      home: Login(),
+      home:SocialMedia(),
     );
   }
 }
