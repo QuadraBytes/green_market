@@ -50,6 +50,8 @@ dependencies:
   community_material_icon: ^5.9.55
   speech_to_text: ^6.6.2
   firebase_storage: ^12.1.3
+  font_awesome_flutter: ^10.7.0
+  
 
 
 dev_dependencies:
@@ -88,7 +90,7 @@ flutter:
     - assets/images/appbar1.png
     - assets/images/appbar2.png
     - assets/images/profile.png
-    # - assets/images/logo3.png
+    - assets/images/linkedin.png
     - assets/images/farmer.jpg
     - assets/images/facebook.png
     - assets/images/instagram.png

@@ -12,6 +12,7 @@ import 'package:green_market/screens/create_profile_screen.dart';
 import 'package:green_market/screens/favourites_screen.dart';
 import 'package:green_market/screens/forget_password.dart';
 import 'package:green_market/screens/profile_screen.dart';
+import 'package:green_market/screens/social_media_screen.dart';
 import 'package:green_market/screens/splash_screen.dart';
 import 'package:green_market/screens/login_screen.dart';
 import 'package:green_market/screens/signin_screen.dart';
@@ -36,7 +37,12 @@ void main() async {
             messagingSenderId: "750742413285",
             appId: "1:750742413285:web:bd03d8351ccfbaa515190c"));
   } else {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyBJUNKdSZCJ7wp2Z7suoLZTleLfQxZUl7E",
+            projectId: "green-market-4",
+            messagingSenderId: "750742413285",
+            appId: "1:750742413285:android:1b1ac00de1c4314415190c"));
   }
 
   // runApp(const GreenMarket());
@@ -60,7 +66,7 @@ class GreenMarket extends StatelessWidget {
       //   colorScheme: ColorScheme.fromSeed(seedColor: kColor),
       //   useMaterial3: true,
       // ),
-      home: BottomBarScreen(),
+      home:SocialMedia(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_market/components/constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:green_market/components/availability_card.dart';
 import 'package:green_market/components/side_bar.dart';
 
 class AvailabilityScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return SafeArea(
       child: Scaffold(
         drawer: SideBar(),
@@ -26,11 +28,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
               child: Builder(
                 builder: (context) {
                   return IconButton(
-                    icon: Icon(
-                      Icons.list,
-                      color: Colors.white,
-                      size: 35,
-                    ),
+                    icon: Icon(Icons.list, color: Colors.white, size: 35),
                     onPressed: () {
                       Scaffold.of(context).openDrawer();
                     },
@@ -42,84 +40,62 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
               top: 25,
               left: size.width * 0.35,
               right: size.width * 0.3,
-              child: Text('Availability',
-                  style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white)),
+              child: Text(
+                'Availability',
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
+              ),
             ),
             Positioned(
               top: 120,
               left: 0,
               right: 0,
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15.0),
-                    child: Card(
-                      elevation: 5,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      color: kColor2,
-                      child: Container(
-                        height: size.height * 0.105,
-                        padding: EdgeInsets.all(15.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Crop Name',
-                                  style: TextStyle(
-                                      color: Color(0xFF222325),
-                                      fontSize: size.height * 0.0175,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                Spacer(),
-                                Container(
-                                  child: Text(
-                                    'Total Weight',
-                                    style: TextStyle(
-                                      color: Color(0xFF222325),
-                                      fontSize: size.height * 0.0175,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.location_on,
-                                  color: Colors.red,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Container(
-                                  child: Text(
-                                    'Kandy, Anuradhapura, Nuwara Eliya',
-                                    style: TextStyle(
-                                      color: Color(0xFF222325),
-                                      fontSize: size.height * 0.0175,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance.collection('crops').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  // Process the data to aggregate weight and districts by crop name
+                  Map<String, Map<String, dynamic>> cropData = {};
+
+                  for (var doc in snapshot.data!.docs) {
+                    String cropName = doc['cropType'];
+                    String district = doc['district'];
+                    double weight = double.parse(doc['weight']);
+
+                    if (!cropData.containsKey(cropName)) {
+                      cropData[cropName] = {
+                        'totalWeight': 0.0,
+                        'locations': <String>[],
+                      };
+                    }
+
+                    cropData[cropName]!['totalWeight'] += weight;
+                    if (!cropData[cropName]!['locations'].contains(district)) {
+                      cropData[cropName]!['locations'].add(district);
+                    }
+                  }
+
+                  return Column(
+                    children: cropData.keys.map((cropName) {
+                      String totalWeight =
+                          cropData[cropName]!['totalWeight'].toString();
+                      String locations =
+                          cropData[cropName]!['locations'].join(', ');
+
+                      return AvailabilityCard(
+                        cropName: cropName,
+                        totalWeight: totalWeight,
+                        location: locations,
+                      );
+                    }).toList(),
+                  );
+                },
               ),
             ),
           ],
